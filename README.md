@@ -9,15 +9,25 @@ In this project, we aim to build a classification model to predict whether a vis
 
 ## Project Lifecycle
 Understanding the Problem Statement
+
 Data Collection
+
 Exploratory Data Analysis
-Data Cleaning
-Data Pre-Processing
-Model Training
-Choosing the Best Model
+
+Data Pre-Processing and feature engineering
+
+Model Training(Experiment tracking)
+
+Model Evaluation
+
+Model Registry
+
 Model Deployment
+
 Model Monitoring
-Data
+
+### Data
+
 The dataset used in this project contains historical data of visa applications. Each record represents an application with various features influencing the visa approval decision.
 
 ## How to Run the Project
