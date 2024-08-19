@@ -101,5 +101,52 @@ WORKSPACE="workspace-name"
 ``
 
 
+Running the Project
+
+Once everything is set up, follow these steps to run the project:
+
+Run the Pipelines:
+
+There is a script named run_pipeline.py in the parent folder. Inside the main function of this script, you will see three pipelines:
+
+```
+run_data_ingestion_pipeline()
+run_feature_engineering_pipeline()
+run_training_model_pipeline()
+```
+
+To run each pipeline, comment out the other pipelines and execute the script:
+
+```
+python run_pipeline.py
+```
+
+This command will trigger the specific pipeline and run all necessary functions inside the pipeline's component script. Each pipeline is made up of components, and those components contain the function steps for the pipeline.
+
+Understanding the Pipeline Implementation:
+
+To see how the pipelines are implemented, go to the pipelines folder.
+
+To see how the components of the pipelines are created, go to the components folder and select either data_ingestion, feature_engineering, or model_training.
+
+Running the FastAPI Endpoint and Request Script:
+
+Start the FastAPI endpoint:
+
+```
+uvicorn app:app --reload
+```
+(Run this command in a separate terminal)
+
+Send a dummy request to the model:
+
+```
+python request.py
+```
+
+(Run this command in another separate terminal)
+
+
+
 
 
