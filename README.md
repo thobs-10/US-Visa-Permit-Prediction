@@ -116,7 +116,7 @@ run_feature_engineering_pipeline()
 run_training_model_pipeline()
 ```
 
-To run each pipeline, comment out the other pipelines and execute the script:
+To run each pipeline, comment out the other pipelines and execute the script( first comment out the feature engineering and nodel training pipeline, then run data ingestion pipeline, after that commeent out the data ingestion pipeline and model training pipeline and run the feature engineering pipeline and so forth):
 
 ```
 python run_pipeline.py
