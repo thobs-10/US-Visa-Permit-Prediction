@@ -171,5 +171,5 @@ pyproject.toml
 .editorconfig
 
 # Ignore YAML configuration files
-*.yaml
+# *.yaml
 *.yml
