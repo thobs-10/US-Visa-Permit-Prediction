@@ -76,20 +76,27 @@ Download the dataset and create the following directory structure:
 
 ``
 <repository-directory>/
+
 └── data/
+
     └── raw_data/
+
         └── Visadataset.csv
 ``
 
 Create a Free Account on Comet.ml:
 
 Sign up at Comet.ml.
+
 Create a project, go to settings, and get your API key, project name, and workspace name.
+
 Place these details in a .env file in the root directory:
 
 ``
 API_KEY="your-api-key"
+
 PROJECT_NAME="project-name"
+
 WORKSPACE="workspace-name"
 ``
 
