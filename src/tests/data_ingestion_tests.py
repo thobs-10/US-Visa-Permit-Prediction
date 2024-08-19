@@ -22,3 +22,6 @@ class TestDataIngestion(unittest.TestCase):
         cleaned_data = self.data_ingestion.data_cleaning(data)
         self.data_ingestion.save_data(cleaned_data)
         self.assertTrue(os.path.exists(self.data_ingestion.data_ingestion_artifact.processed_data_path))
+
+if __name__ == '__main__':
+    unittest.main()
