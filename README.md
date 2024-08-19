@@ -147,6 +147,17 @@ python request.py
 (Run this command in another separate terminal)
 
 
+Every prediction will be saved in a log file.
+
+Run the Batch Monitoring Script:
+
+To see how the predictions are distributed, run the batch monitoring script:
+
+```
+python batch_monitoring.py
+```
+
+
 
 
 
