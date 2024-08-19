@@ -34,7 +34,7 @@ The dataset used in this project contains historical data of visa applications. 
 
 Dataset Link:
 
-Please download the dataset from the following link: Dataset Link
+Please download the dataset from the following link: [Dataset Link](https://www.kaggle.com/datasets/moro23/easyvisa-dataset)
 Clone the Repository:
 ``
 git clone <repository-url>
@@ -86,7 +86,7 @@ Download the dataset and create the following directory structure:
 
 Create a Free Account on Comet.ml:
 
-Sign up at Comet.ml.
+Sign up at Comet.ml. This is used for experiment tracking and model registry
 
 Create a project, go to settings, and get your API key, project name, and workspace name.
 
