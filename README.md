@@ -31,3 +31,22 @@ Model Monitoring
 The dataset used in this project contains historical data of visa applications. Each record represents an application with various features influencing the visa approval decision.
 
 ## How to Run the Project
+
+Dataset Link:
+
+Please download the dataset from the following link: Dataset Link
+Clone the Repository:
+``
+git clone <repository-url>
+cd <repository-directory>
+``
+Create a Virtual Environment:
+
+Install virtualenv (if not already installed):
+``
+pip install virtualenv
+``
+``
+python -m venv us-visa-permit-env
+``
+

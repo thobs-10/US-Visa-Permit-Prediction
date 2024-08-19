@@ -77,5 +77,5 @@ def run_training_model_pipeline():
 
 if __name__ == "__main__":
     # run_data_ingestion_pipeline()
-    # run_feature_engineering_pipeline()
-    run_training_model_pipeline()
+    run_feature_engineering_pipeline()
+    # run_training_model_pipeline()
