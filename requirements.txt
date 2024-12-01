@@ -157,7 +157,7 @@ tzdata==2024.1
 ujson==5.10.0
 universal_pathlib==0.2.2
 urllib3==2.2.2
--e git+https://github.com/thobs-10/US-Visa-Permit-Prediction.git@653476173fc546213eeca0b2241b724bebdac56f#egg=us_visa_permit_mlops_zoomcamp_course_project
+
 uvicorn==0.30.6
 waitress==3.0.0
 watchdog==4.0.2
@@ -168,3 +168,6 @@ wrapt==1.16.0
 wurlitzer==3.1.1
 xgboost==2.1.1
 zipp==3.20.0
+
+
+-e .
