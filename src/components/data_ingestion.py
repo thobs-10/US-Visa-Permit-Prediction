@@ -61,18 +61,6 @@ class DataIngestion:
         logger.debug("Duplicates handled")
         return df
     
-    def save_data(self, df: pd.DataFrame) -> None:
-        try:
-            logging.info("Saving data to processed folder")
-            os.makedirs(self.data_ingestion_artifact.processed_data_path, exist_ok=True)
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            processed_file_path = os.path.join(
-                self.data_ingestion_artifact.processed_data_path, 
-                f'processed_data_{timestamp}.parquet'
-            )            
-            df.to_parquet(processed_file_path, index=False)
-        except Exception as e:
-            raise AppException(e, sys)
     
     
         
