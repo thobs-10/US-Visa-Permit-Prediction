@@ -5,7 +5,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-from src.logger import logging
+# from src.logger import logging
+from loguru import logger
 from src.Exception import AppException
 from src.entity.artifact_entity import DataIngestionArtifact
 from src.entity.config_entity import DataIngestionConfig
