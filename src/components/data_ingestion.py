@@ -12,9 +12,9 @@ from src.entity.artifact_entity import DataIngestionArtifact
 from src.entity.config_entity import DataIngestionConfig
 
 class DataIngestion:
-    def __init__(self, data_ingestion_artifact: DataIngestionArtifact = DataIngestionArtifact()):
+    def __init__(self, data_ingestion_config: DataIngestionConfig = DataIngestionConfig()):
         try:
-            self.data_ingestion_artifact = data_ingestion_artifact
+            self.data_ingestion_config = data_ingestion_config
         except Exception as e:
             raise AppException(e, sys)
     
