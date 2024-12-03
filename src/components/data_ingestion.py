@@ -20,11 +20,10 @@ class DataIngestion:
     
     def load_data(self) -> pd.DataFrame:
         try:
-            logging.info("Loading data from raw folder")
-            filename = os.listdir(self.data_ingestion_artifact.raw_data_path)[1]  # Assumes there's only one file
-            file_path = os.path.join(self.data_ingestion_artifact.raw_data_path, filename)
-            data = pd.read_csv(file_path)
-            logging.info(f"Loaded {filename} from raw folder")
+            logger.info("Loading data from raw folder")
+            filepath = os.path.join(self.data_ingestion_config.raw_data_path)
+            data = pd.read_csv(filepath)
+            logger.debug(f"Loaded {filepath} from raw folder")
             return data
         except Exception as e:
             raise AppException(e, sys)
