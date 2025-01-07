@@ -10,14 +10,12 @@ from loguru import logger
 from src.Exception import AppException
 from src.entity.artifact_entity import DataIngestionArtifact
 from src.entity.config_entity import DataIngestionConfig
+from src.components.component import Component
 
-class DataIngestion:
+class DataIngestion(Component):
     def __init__(self, data_ingestion_config: DataIngestionConfig = DataIngestionConfig()):
-        try:
-            self.data_ingestion_config = data_ingestion_config
-        except Exception as e:
-            raise AppException(e, sys)
-    
+        self.data_ingestion_config = data_ingestion_config.raw_data_path
+   
     def load_data(self) -> pd.DataFrame:
         try:
             logger.info("Loading data from raw folder")
@@ -61,6 +59,13 @@ class DataIngestion:
         logger.debug("Duplicates handled")
         return df
     
-    
+    def save(self, data: pd.DataFrame, filename: str='processed_data.parquet') -> None:
+        try:
+            logger.info("Saving data to processed folder")
+            filepath = os.path.join(self.data_ingestion_config.processed_data_path, filename)
+            data.to_parquet(filepath)
+            logger.debug(f"Saved {filepath} to processed folder")
+        except Exception as e:
+            raise AppException(e, sys)
     
         
