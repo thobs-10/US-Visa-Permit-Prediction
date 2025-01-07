@@ -30,102 +30,57 @@ from src.logger import logging
 from src.Exception import AppException
 from src.entity.artifact_entity import ModelTrainingArtifact
 from src.entity.config_entity import ModelTrainingConfig, ModelTrainingPipelineConfig
-# from src.entity.artifact_entity import FeatureEngineeringArtifact
 from src.entity.config_entity import FeatureEngineeringConfig
+from src.components.component import Component
+from src.utils.main_utils import get_models
 
 import comet_ml
 from comet_ml import API
-from comet_ml.query import (
-    Environment,
-    Metric,
-    Parameter,
-    Other,
-    Metadata,
-    Tag
-)
+from comet_ml.query import Metric
 import mlflow
 
 load_dotenv()
 
-class ModelTraining:
-    def __init__(self, config: ModelTrainingConfig, artifact: ModelTrainingArtifact):
-        self.config = config
-        self.artifact = artifact
-        self.output_dir = "data\\feature_store"
-        self.models = {
-                # "Random_Forest": RandomForestClassifier(),
-                "Decision_Tree": DecisionTreeClassifier(),
-                # "Gradient_Boosting": GradientBoostingClassifier(),
-                # "Logistic_Regression": LogisticRegression(),
-                # "K-Neighbors_Classifier": KNeighborsClassifier(),
-                # "XGBClassifier": XGBClassifier(), 
-                # "CatBoosting_Classifier": CatBoostClassifier(verbose=False),
-                # "Support_Vector_Classifier": SVC(),
-                # "AdaBoost_Classifier": AdaBoostClassifier()
-
-            }
+class ModelTraining(Component):
+    def __init__(self, model_training_config: ModelTrainingConfig = ModelTrainingConfig(),
+                 feature_engineering_config: FeatureEngineeringConfig = FeatureEngineeringConfig()):
+        
+        self.model_training_config = model_training_config
+        self.feature_engineering_config = feature_engineering_config
+        
     
-    def load_data(self, feature_engineering_config : FeatureEngineeringConfig) -> tuple:
+    def load_data(self) -> tuple:
         try:
-            logging.info("Loading feature engineered data")
-            # Full paths for the files
-            transformed_features_file_path = os.path.join( feature_engineering_config.transformed_features_file)
-            transformed_target_file_path = os.path.join( feature_engineering_config.transformed_target_file)
-            # Load DataFrame from Parquet
-            X_df = pd.read_parquet(transformed_features_file_path)
-            y_df = pd.read_parquet(transformed_target_file_path)
-            # combined_df = pd.concat([X_df, y_df], axis=1)
-            # Convert DataFrame and Series back to NumPy arrays
-            # X = X_df.to_numpy()
-            # y = y_df['case_status']      
+            logging.info("Loading feature engineered data(features.parquet and target.csv)")
+            transformed_features_file_path = os.path.join(self.feature_engineering_config.feature_engineering_dir)
+            X_df = pd.read_parquet(os.path.join(transformed_features_file_path, "features.parquet"))
+            y_df = pd.read_csv(os.path.join(transformed_features_file_path, "target.csv"))  
             logging.info("Processed data loaded and converted to NumPy arrays successfully")
             return X_df, y_df
         except Exception as e:
             raise AppException(e, sys)
     
     def split_data(self, X, y) -> tuple:
-        try:
-            logging.info("Splitting data into training, validation, and test sets")
-            X_train, X_temp, y_train, y_temp = train_test_split(X, y, train_size=0.7, random_state=42)
-            X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=1/3, random_state=42)
-            # X_train, y_train, X_valid, y_valid, X_test, y_test = train_valid_test_split(combined_df, 'case_status', train_size = 0.7, valid_size=0.2, test_size=0.1, random_state=42)
-            logging.info("Data split completed successfully")
-            # save the splits into parquet file
-            # Convert splits to DataFrames
-            X_train_df = pd.DataFrame(X_train)
-            X_valid_df = pd.DataFrame(X_valid)
-            X_test_df = pd.DataFrame(X_test)
-            y_train_df = pd.DataFrame(y_train, columns=['case_status'])
-            y_valid_df = pd.DataFrame(y_valid, columns=['case_status'])
-            y_test_df = pd.DataFrame(y_test, columns=['case_status'])
-
-            # make the output directory
-            os.makedirs(self.output_dir, exist_ok=True)
-            # Save splits to Parquet files
-            X_train_df.to_parquet(os.path.join(self.output_dir, "X_train.parquet"), index=False)
-            X_valid_df.to_parquet(os.path.join(self.output_dir, "X_valid.parquet"), index=False)
-            X_test_df.to_parquet(os.path.join(self.output_dir, "X_test.parquet"), index=False)
-            y_train_df.to_parquet(os.path.join(self.output_dir, "y_train.parquet"), index=False)
-            y_valid_df.to_parquet(os.path.join(self.output_dir, "y_valid.parquet"), index=False)
-            y_test_df.to_parquet(os.path.join(self.output_dir, "y_test.parquet"), index=False)
-
-            
-            return X_train, X_valid, X_test, y_train, y_valid, y_test
-        except Exception as e:
-            raise AppException(e, sys)
+        logging.info("Splitting data into training, validation, and test sets")
+        X_train, X_temp, y_train, y_temp = train_test_split(X, y, train_size=0.7, random_state=42)
+        X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=1/3, random_state=42)
+        logging.info("Data split completed successfully")
+        return X_train, y_train, X_test, y_test, X_valid, y_valid
+     
     
     def tracking_details_init(self):
-        API_key = 'biu1KFYstI65GB8ztbszw9CdN'
-        proj_name = 'mlops-project'
+        API_key = os.getenv("COMET_API_KEY")
+        proj_name = os.getenv("COMET_PROJECT_NAME")
         comet_ml.init()
         experiment = comet_ml.Experiment(
             api_key=API_key,
             project_name=proj_name,
-            workspace="thobela",
+            workspace=os.getenv("MLOPS_WORKSPACE_NAME"),
         )
         return experiment
 
     def train_model(self, X_train, X_valid, y_train, y_valid) -> str:
+        models = get_models()
         try:
             logging.info("Training model phase")
             experiment = self.tracking_details_init()
