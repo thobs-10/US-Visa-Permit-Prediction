@@ -15,3 +15,13 @@ class DataIngestionConfig:
 class DataPreprocessingConfig:
     processed_data_path: str = os.getenv('PROCESSED_PATH_FILE')
 
+
+@dataclass
+class FeatureEngineeringConfig:
+    feature_engineering_dir: str = os.getenv('FEATURE_ENGINEERED_DATA_PATH')
+
+
+@dataclass
+class ModelTrainingConfig:
+    model_artifact_dir: str = os.getenv('ARTIFACTS_PATH')
+    
