@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 import yaml
 import base64
-from typing import List,Tuple
+from typing import List,Tuple, Optional, Union, Any
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import PowerTransformer
@@ -20,9 +20,12 @@ from sklearn.metrics import accuracy_score, classification_report,ConfusionMatri
                             precision_score, recall_score, f1_score, roc_auc_score,roc_curve 
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
-
+from sklearn.base import BaseEstimator
+import joblib
 from src.logger import logging
 from src.Exception import AppException
+import comet_ml
+from comet_ml import API, Experiment
 
 def read_yaml_file(filepath: str) -> dict:
     """
@@ -136,3 +139,35 @@ def get_models()-> dict:
 
     }
     return models
+
+def train_and_save(X_train: pd.DataFrame, X_valid: pd.DataFrame, 
+                   y_train: pd.Series, model_name: str,
+                    model: Union[BaseEstimator, Any])-> Tuple[pd.Series, str]:
+
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_valid)
+    model_path = f"src\models\{model_name}.pkl"
+    joblib.dump(model, model_path)
+    return y_pred, model_path
+
+def compute_accuracy_metrics(y_pred: pd.Series, 
+                             y_valid: pd.Series)-> Tuple[float, float, float, float, float]:
+    
+    acc = accuracy_score(y_valid, y_pred)
+    f1 = f1_score(y_valid, y_pred, average='weighted')
+    precision = precision_score(y_valid, y_pred, average='weighted')
+    recall = recall_score(y_valid, y_pred, average='weighted')
+    roc_auc = roc_auc_score(y_valid, y_pred, multi_class='ovr')
+
+    return acc, f1, precision, recall, roc_auc
+
+def tracking_details_init() -> Experiment:
+        API_key = os.getenv("COMET_API_KEY")
+        proj_name = os.getenv("COMET_PROJECT_NAME")
+        comet_ml.init()
+        experiment = comet_ml.Experiment(
+            api_key=API_key,
+            project_name=proj_name,
+            workspace=os.getenv("MLOPS_WORKSPACE_NAME"),
+        )
+        return experiment
