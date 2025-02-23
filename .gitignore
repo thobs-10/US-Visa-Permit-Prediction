@@ -171,5 +171,7 @@ us-visa-project/
 .editorconfig
 
 # Ignore YAML configuration files
-# *.yaml
+*.yaml
 *.yml
+.zen
+src/components/scatchpad.ipynb
