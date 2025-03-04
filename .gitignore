@@ -175,3 +175,4 @@ us-visa-project/
 *.yml
 .zen
 src/components/scatchpad.ipynb
+/data
