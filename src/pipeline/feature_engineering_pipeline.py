@@ -6,6 +6,7 @@ from src.components.feature_engineering import (
     removing_outliers,
     feature_transformations,
     save,
+    save_to_feast_feature_store,
 )
 
 
@@ -17,7 +18,8 @@ def run_feature_engineering() -> None:
         df = feature_extraction(processed_data)
         df = removing_outliers(df)
         df, X, y = feature_transformations(df)
-        save(X, y)
+        save(X, y, df)
+        save_to_feast_feature_store(df)
         logger.info("Feature engineering pipeline completed successfully")
     except Exception as e:
         raise e

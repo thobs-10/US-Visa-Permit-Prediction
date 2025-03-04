@@ -4,6 +4,7 @@ from datetime import date
 
 
 from typing import Tuple
+from datetime import datetime
 
 from loguru import logger
 from src.entity.config_entity import FeatureEngineeringConfig
@@ -17,6 +18,8 @@ from src.utils.main_utils import (
     get_statistical_properties,
 )
 from zenml import step
+
+from feast import FeatureStore, FeatureView, Entity, ValueType, FileSource
 
 
 @step(enable_cache=False)
@@ -110,7 +113,7 @@ def feature_transformations(
 
 
 @step
-def save(X: pd.DataFrame, y: pd.Series) -> None:
+def save(X: pd.DataFrame, y: pd.Series, df: pd.DataFrame) -> None:
     try:
         logger.info("Saving feature engineered data")
         fullpath = FeatureEngineeringConfig.feature_engineering_dir
@@ -123,6 +126,33 @@ def save(X: pd.DataFrame, y: pd.Series) -> None:
         target_filename = os.path.join(fullpath, "target.csv")
         X.to_parquet(feature_filename)
         y.to_csv(target_filename)
+        df["event_timestamp"] = datetime.now()
+        df.to_parquet(os.path.join(fullpath, "full_data.parquet"))
         logger.info("Processed data saved successfully")
+    except Exception as e:
+        raise e
+
+
+@step
+def save_to_feast_feature_store(df: pd.DataFrame) -> None:
+    try:
+        logger.info("Saving data to Feast feature store")
+        df["event_timestamp"] = datetime.now()
+        passenger = Entity(name="case_id", value_type=ValueType.STRING)
+        feature_view = FeatureView(
+            name="passenger_features",
+            entities=[Entity(name="case_id", value_type=ValueType.STRING)],
+            ttl=None,
+            source=FileSource(
+                path="/Users/thobelasixpence/Documents/mlops-zoomcamp-project-2024/US-Visa-Permit-Prediction/data/feature_store/full_data.parquet",
+                event_timestamp_column="event_timestamp",
+            ),
+        )
+        fs = FeatureStore(
+            repo_path="/Users/thobelasixpence/Documents/mlops-zoomcamp-project-2024/US-Visa-Permit-Prediction/my_feature_store/feature_repo",
+        )
+        fs.apply([passenger, feature_view])
+        fs.materialize_incremental(end_date=datetime.now())
+        logger.info("Data saved to Feast feature store")
     except Exception as e:
         raise e
