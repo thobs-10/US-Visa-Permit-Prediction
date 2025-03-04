@@ -9,7 +9,7 @@ from src.entity.config_entity import DataPreprocessingConfig
 from zenml import step
 
 
-@step
+@step(enable_cache=False)
 def load_data() -> pd.DataFrame:
     try:
         logger.info("Loading data from raw folder")
