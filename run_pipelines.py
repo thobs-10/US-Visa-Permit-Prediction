@@ -9,7 +9,7 @@ from src.entity.config_entity import (
     FeatureEngineeringPipelineConfig,
 )
 
-from src.pipeline.training_model import ModelTrainingPipeline
+from src.pipeline.training_pipeline import ModelTrainingPipeline
 from src.entity.artifact_entity import ModelTrainingArtifact
 from src.entity.config_entity import ModelTrainingConfig, ModelTrainingPipelineConfig
 
