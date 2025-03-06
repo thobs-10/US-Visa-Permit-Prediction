@@ -19,7 +19,7 @@ def run_feature_engineering() -> None:
         df = removing_outliers(df)
         df, X, y = feature_transformations(df)
         save(X, y, df)
-        save_to_feast_feature_store(df)
+        save_to_feast_feature_store()
         logger.info("Feature engineering pipeline completed successfully")
     except Exception as e:
         raise e
