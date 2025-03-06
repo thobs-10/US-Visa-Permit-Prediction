@@ -32,6 +32,7 @@ from loguru import logger
 import comet_ml
 from comet_ml import API, Experiment, APIExperiment
 from comet_ml.query import Metric
+from src.entity.config_entity import ModelTrainingConfig
 
 
 def read_yaml_file(filepath: str) -> dict:
@@ -97,6 +98,7 @@ def apply_power_transform(
 ) -> pd.DataFrame:
     X_copy = X.copy()
     from sklearn.preprocessing import PowerTransformer
+
     pt = PowerTransformer(method="yeo-johnson")
     X_copy[transform_features] = pt.fit_transform(X[transform_features])
     return X_copy
@@ -197,9 +199,10 @@ def train_and_save(
 ) -> Tuple[np.ndarray, str]:
     model.fit(X_train, y_train)
     y_pred = model.predict(X_valid)
-    model_path = f"src/models/{model_name}.pkl"
-    joblib.dump(model, model_path)
-    return y_pred, model_path
+    artefact_path = "src/artefact/models/"
+    os.makedirs(ModelTrainingConfig.model_artifact_dir, exist_ok=True)
+    joblib.dump(model, os.path.join(artefact_path, f"{model_name}.pkl"))
+    return y_pred, artefact_path
 
 
 def compute_accuracy_metrics(
