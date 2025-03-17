@@ -12,6 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
+from scipy.stats import uniform, norm, loguniform, randint
 
 root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv(dotenv_path=os.path.join(root_dir, ".env"))
@@ -43,67 +44,67 @@ class ModelTuningConfig:
 
 
 search_space = {
-    # 'Random_Forest': {
-    #     'n_estimators': [100, 200, 300, 400],
-    #     'max_depth': [10, 20, 30, 40, 50],
-    #     'min_samples_split': [2, 5, 10],
-    #     'min_samples_leaf': [1, 2, 3, 4, 5],
-    #     'criterion': ['gini', 'entropy'],
-    # },
+    "Random_Forest": {
+        "n_estimators": randint(100, 500),  # Random integer between 100 and 500
+        "max_depth": randint(10, 50),  # Random integer between 10 and 50
+        "min_samples_split": randint(2, 10),  # Random integer between 2 and 10
+        "min_samples_leaf": randint(1, 5),  # Random integer between 1 and 5
+        "criterion": ["gini", "entropy"],  # Categorical (no distribution)
+    },
     "Decision_Tree": {
-        "max_depth": [10, 20, 30, 40, 50],
-        "min_samples_split": [2, 5, 10],
-        "min_samples_leaf": [1, 2, 3, 4, 5],
+        "max_depth": randint(10, 50),
+        "min_samples_split": randint(2, 10),
+        "min_samples_leaf": randint(1, 5),
         "criterion": ["gini", "entropy"],
     },
-    # 'Gradient_Boosting': {
-    #     'n_estimators': [100, 200, 300, 400],
-    #     'learning_rate': [0.01, 0.05, 0.1, 0.2, 0.3],
-    #     'max_depth': [10, 20, 30, 40, 50],
-    #     'min_samples_split': [2, 5, 10],
-    #     'min_samples_leaf': [1, 2, 3, 4, 5],
-    # },
-    # 'Logistic_Regression': {
-    #     'C': [0.01, 0.1, 1, 10],
-    #     'solver': ['lbfgs', 'liblinear', 'sag', 'saga'],
-    # },
-    # 'K-Neighbors_Classifier': {
-    #     'n_neighbors': list(range(1, 31)),
-    #     'weights': ['uniform', 'distance'],
-    #     'algorithm': ['ball_tree', 'kd_tree', 'brute'],
-    # },
-    # 'XGBClassifier': {
-    #     'n_estimators': [100, 200, 300, 400],
-    #     'learning_rate': [0.01, 0.05, 0.1, 0.2, 0.3],
-    #     'max_depth': list(range(10, 51)),
-    #     'subsample': [0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-    #     'colsample_bytree': [0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-    # },
-    # 'CatBoosting_Classifier': {
-    #     'iterations': [100, 200, 300, 400],
-    #     'learning_rate': [0.01, 0.05, 0.1, 0.2, 0.3],
-    #     'depth': list(range(4, 11)),
-    #     'l2_leaf_reg': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    # },
-    # 'Support_Vector_Classifier': {
-    #     'C': [0.1, 0.5, 1, 5, 10],
-    #     'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
-    # },
-    # 'AdaBoost_Classifier': {
-    #     'n_estimators': [50, 100, 200, 300],
-    #     'learning_rate': [0.01, 0.05, 0.1, 0.2, 0.5, 1.0],
-    # }
+    "Gradient_Boosting": {
+        "n_estimators": randint(100, 500),
+        "learning_rate": loguniform(1e-3, 1e-1),  # Log-uniform distribution between 0.001 and 0.1
+        "max_depth": randint(10, 50),
+        "min_samples_split": randint(2, 10),
+        "min_samples_leaf": randint(1, 5),
+    },
+    "Logistic_Regression": {
+        "C": loguniform(1e-2, 1e2),  # Log-uniform distribution between 0.01 and 100
+        "solver": ["lbfgs", "liblinear", "sag", "saga"],
+    },
+    "K-Neighbors_Classifier": {
+        "n_neighbors": randint(1, 31),  # Random integer between 1 and 30
+        "weights": ["uniform", "distance"],
+        "algorithm": ["ball_tree", "kd_tree", "brute"],
+    },
+    "XGBClassifier": {
+        "n_estimators": randint(100, 500),
+        "learning_rate": loguniform(1e-3, 1e-1),
+        "max_depth": randint(10, 50),
+        "subsample": uniform(0.5, 0.5),  # Uniform distribution between 0.5 and 1.0
+        "colsample_bytree": uniform(0.5, 0.5),
+    },
+    "CatBoosting_Classifier": {
+        "iterations": randint(100, 500),
+        "learning_rate": loguniform(1e-3, 1e-1),
+        "depth": randint(4, 11),
+        "l2_leaf_reg": randint(1, 11),
+    },
+    "Support_Vector_Classifier": {
+        "C": loguniform(1e-1, 1e1),  # Log-uniform distribution between 0.1 and 10
+        "kernel": ["linear", "poly", "rbf", "sigmoid"],
+    },
+    "AdaBoost_Classifier": {
+        "n_estimators": randint(50, 300),
+        "learning_rate": loguniform(1e-3, 1e0),  # Log-uniform distribution between 0.001 and 1.0
+    },
 }
 
 # Models list for Hyperparameter tuning
 randomcv_models = [
     # ('XGBClassifier', XGBClassifier(), search_space['XGBClassifier']),
-    # ('Random_Forest', RandomForestClassifier(), search_space['Random_Forest']),
-    # ('K-Neighbors_Classifier', KNeighborsClassifier(), search_space['K-Neighbors_Classifier']),
+    ("Random_Forest", RandomForestClassifier(), search_space["Random_Forest"]),
+    ("K-Neighbors_Classifier", KNeighborsClassifier(), search_space["K-Neighbors_Classifier"]),
     ("Decision_Tree", DecisionTreeClassifier(), search_space["Decision_Tree"]),
-    # ('Gradient_Boosting', GradientBoostingClassifier(), search_space['Gradient_Boosting']),
-    # ('Logistic_Regression', LogisticRegression(), search_space['Logistic_Regression']),
-    # ('Support_Vector_Classifier', SVC(), search_space['Support_Vector_Classifier']),
-    # ('AdaBoost_Classifier', AdaBoostClassifier(),search_space['AdaBoost_Classifier']),
+    ("Gradient_Boosting", GradientBoostingClassifier(), search_space["Gradient_Boosting"]),
+    ("Logistic_Regression", LogisticRegression(), search_space["Logistic_Regression"]),
+    ("Support_Vector_Classifier", SVC(), search_space["Support_Vector_Classifier"]),
+    ("AdaBoost_Classifier", AdaBoostClassifier(), search_space["AdaBoost_Classifier"]),
     # ('CatBoosting_Classifier', CatBoostClassifier(verbose=False), search_space['CatBoosting_Classifier'])
 ]
