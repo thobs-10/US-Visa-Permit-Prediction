@@ -1,103 +1,78 @@
-import os
+from typing import Any
+import mlflow.artifacts
 import pandas as pd
-from typing import Optional, Tuple
-import comet_ml
 from loguru import logger
 from src.utils.main_utils import (
-    get_tracking_api_experiment,
-    get_chosen_model_from_search,
-    logging_metrics,
-    feature_scaling,
-    get_models,
-    saving_model_object_zip_file,
+    log_mlflow_metrics,
+    load_local_model,
 )
 from src.entity.config_entity import randomcv_models
-from comet_ml import Experiment
 from sklearn.model_selection import (
     RandomizedSearchCV,
     KFold,
-    cross_val_score,
 )
-from sklearn.base import BaseEstimator
+from sklearn.compose import ColumnTransformer
 import multiprocessing as mp
+import mlflow
+from mlflow.models import infer_signature
+from mlflow.tracking import MlflowClient
 
 
-class HyperparameterTuning:
-    def __init__(
-        self,
-    ):
-        self.model_param = {}
+tracking_uri = mlflow.get_tracking_uri()
+mlflow_client = MlflowClient(tracking_uri=tracking_uri)
 
-    def hyperparameter_tuning(
-        self, exp_key: str, X_train, Y_train, X_val, Y_val
-    ) -> Tuple[str, Experiment]:
-        logger.info("starting hyperparameter tuning")
-        api_experiment = get_tracking_api_experiment(exp_key)
-        randomcv_models_dict = {
-            name: (model, params) for name, model, params in randomcv_models
-        }
-        comet_ml.init()
-        experiment = comet_ml.Experiment(
-            api_key=os.environ["API_KEY"],
-            project_name=os.environ["PROJECT_NAME"],
-            workspace=os.environ["WORKSPACE"],
+
+def hyperparameter_tuning(
+    X_train: pd.DataFrame,
+    X_val: pd.DataFrame,
+    y_train: pd.Series,
+    y_val: pd.Series,
+    chosen_model_path: str,
+    chosen_model_name: str,
+    column_transformer: ColumnTransformer,
+    max_evals: int = 5,
+) -> Any:
+    """create new experiment for hyperparameter tuning using mlflow, get model assets from previous experiments and
+    perform hyperparameter tuning and log the model parameters"""
+
+    mlflow.set_experiment("Hyperparameter Tuning Phase")
+    mlflow.set_experiment_tag("model-tuning", "v1.0.0")
+
+    model = load_local_model(f"{chosen_model_path}/{chosen_model_name}.pkl")
+    if not model:
+        raise ValueError("Failed to load the chosen model.")
+
+    tuple_item = [item for item in randomcv_models if item[0] == chosen_model_name]
+    if not tuple_item:
+        raise ValueError("Could not find the model for the given model name.")
+    model_name, chosen_model, search_space = tuple_item[0]
+    kf = KFold(n_splits=2, shuffle=True, random_state=42)
+    random_cv_model = RandomizedSearchCV(
+        estimator=model,
+        param_distributions=search_space,
+        n_iter=2,
+        cv=kf,
+        verbose=2,
+        n_jobs=mp.cpu_count(),
+        random_state=42,
+    )
+    X_train_scaled = column_transformer.fit_transform(X_train)  # type: ignore
+    X_valid_scaled = column_transformer.transform(X_val)  # type: ignore
+    random_cv_model.fit(X_train_scaled, y_train)
+    best_model = random_cv_model.best_estimator_
+    best_model.set_params(**random_cv_model.best_params_)
+    y_pred = best_model.predict(X_valid_scaled)  # type: ignore
+    signature = infer_signature(X_valid_scaled, y_pred)
+    metrics_dict = log_mlflow_metrics(y_pred, y_val)
+    with mlflow.start_run():
+        mlflow.sklearn.log_model(
+            sk_model=best_model,
+            signature=signature,
+            artifact_path="model",
+            registered_model_name=chosen_model_name,
         )
-        for model_name, model in get_models.items():
-            assets = api_experiment.get_model_asset_list(model_name=model_name)
-            if len(assets) > 0:
-                model_assets = [
-                    asset for asset in assets if asset["fileName"].endswith(".pkl")
-                ]
-                chosen_model, chosen_params = get_chosen_model_from_search(
-                    model_assets, randomcv_models_dict
-                )
-                with experiment.train():
-                    logger.info(
-                        f"Performing hyperparameter tuning for model: {model_name}"
-                    )
-                    random_cv_model = RandomizedSearchCV(
-                        estimator=chosen_model,
-                        param_distributions=chosen_params,
-                        n_iter=10,
-                        cv=5,
-                        verbose=2,
-                        n_jobs=-1,
-                        random_state=42,
-                    )
-                    column_transformer, X_train_scaled, X_valid_scaled = (
-                        feature_scaling(
-                            X_train,
-                            X_val,
-                        )
-                    )
-                    random_cv_model.fit(X_train_scaled, Y_train)
-                    y_pred = random_cv_model.predict(X_val)
-                    logging_metrics(experiment, y_pred, Y_val)
-                    logger.info(
-                        f"Completed hyperparameter tuning for model: {model_name}"
-                    )
-        hyper_exp_key = experiment.get_key()
-        return hyper_exp_key, experiment
+        mlflow.log_params(random_cv_model.best_params_)
+        mlflow.log_metrics(metrics_dict)
+    logger.info(f"Completed hyperparameter tuning for model: {model_name}")
 
-    def peform_cross_validation(
-        self,
-        model: RandomizedSearchCV,
-        x_val: pd.DataFrame,
-        y_val: pd.Series,
-        experiment: Experiment,
-        experiment_key: Optional[str] = None,
-        threshold: float = 0.8,
-    ) -> BaseEstimator:
-        logger.info("Performing cross validation")
-        kf = KFold(n_splits=5, shuffle=True, random_state=42)
-        best_model = model.best_estimator_
-        scores = cross_val_score(best_model, x_val, y_val, cv=kf, n_jobs=mp.cpu_count())
-        mean_score = scores.mean()
-        if mean_score < threshold:
-            raise ValueError("Cross validation score is less than threshold")
-        experiment.log_metric("Cross Validation Score", mean_score)
-        experiment.log_parameters(model.best_params_)
-        # experiment.log_model("Best Model", best_model)
-        saving_model_object_zip_file(best_model, experiment)
-        logger.info(f"Cross validation score: {mean_score}")
-        return best_model
+    return best_model
