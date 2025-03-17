@@ -176,3 +176,6 @@ us-visa-project/
 .zen
 src/components/scatchpad.ipynb
 /data
+mlruns/
+mlartifacts/
+cachedir/
