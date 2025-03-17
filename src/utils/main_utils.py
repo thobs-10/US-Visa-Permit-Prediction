@@ -1,7 +1,7 @@
 import os
 import pickle
 import yaml
-from typing import List, Tuple, Union, Any, Dict
+from typing import List, Tuple, Union, Any, Dict, Callable
 import pandas as pd
 import numpy as np
 from scipy.sparse import spmatrix
@@ -28,11 +28,13 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 import joblib
+from sklearn.base import ClassifierMixin
+from joblib import Memory
 from loguru import logger
-import comet_ml
-from comet_ml import API, Experiment, APIExperiment
-from comet_ml.query import Metric
 from src.entity.config_entity import ModelTrainingConfig
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+memory = Memory(location="cachedir", verbose=0)
 
 
 def read_yaml_file(filepath: str) -> dict:
@@ -128,15 +130,11 @@ def get_statistical_properties(
     return Q1, Q3, IQR
 
 
-def instantiate_encoders() -> Tuple[
-    StandardScaler, OneHotEncoder, OrdinalEncoder, Pipeline
-]:
+def instantiate_encoders() -> Tuple[StandardScaler, OneHotEncoder, OrdinalEncoder, Pipeline]:
     numeric_transformer = StandardScaler()
     oh_transformer = OneHotEncoder()
     ordinal_encoder = OrdinalEncoder()
-    transform_pipe = Pipeline(
-        steps=[("transformer", PowerTransformer(method="yeo-johnson"))]
-    )
+    transform_pipe = Pipeline(steps=[("transformer", PowerTransformer(method="yeo-johnson"))])
     return numeric_transformer, oh_transformer, ordinal_encoder, transform_pipe
 
 
@@ -155,9 +153,7 @@ def get_column_list(X: pd.DataFrame):
 
 def get_column_transformer(X: pd.DataFrame):
     num_features, or_columns, oh_columns, transform_columns = get_column_list(X)
-    numeric_transformer, oh_transformer, ordinal_encoder, transform_pipe = (
-        instantiate_encoders()
-    )
+    numeric_transformer, oh_transformer, ordinal_encoder, transform_pipe = instantiate_encoders()
     preprocessor = ColumnTransformer(
         [
             ("OneHotEncoder", oh_transformer, oh_columns),
@@ -185,7 +181,8 @@ def get_models() -> dict:
 def train_and_save(
     X_train: np.ndarray[Any, Any] | spmatrix,
     X_valid: np.ndarray[Any, Any] | spmatrix,
-    y_train: np.ndarray,
+    y_train: pd.Series,
+    y_valid: pd.Series,
     model_name: str,
     model: Union[
         LogisticRegression,
@@ -199,10 +196,12 @@ def train_and_save(
 ) -> Tuple[np.ndarray, str]:
     model.fit(X_train, y_train)
     y_pred = model.predict(X_valid)
-    artefact_path = "src/artefact/models/"
-    os.makedirs(ModelTrainingConfig.model_artifact_dir, exist_ok=True)
-    joblib.dump(model, os.path.join(artefact_path, f"{model_name}.pkl"))
-    return y_pred, artefact_path
+    os.makedirs(os.path.join(ModelTrainingConfig.model_artifact_dir, model_name), exist_ok=True)
+    joblib.dump(
+        model,
+        os.path.join(ModelTrainingConfig.model_artifact_dir, model_name, f"{model_name}.pkl"),
+    )
+    return y_pred, ModelTrainingConfig.model_artifact_dir
 
 
 def compute_accuracy_metrics(
@@ -218,61 +217,39 @@ def compute_accuracy_metrics(
     return acc, f1, precision, recall, roc_auc
 
 
-def tracking_details_init() -> Experiment:
-    API_key = os.environ["COMET_API_KEY"]
-    proj_name = os.environ["COMET_PROJECT_NAME"]
-    comet_ml.init()
-    experiment = comet_ml.Experiment(
-        api_key=API_key,
-        project_name=proj_name,
-        workspace=os.environ["MLOPS_WORKSPACE_NAME"],
-    )
-    return experiment
-
-
-def logging_metrics(
-    experiment: Experiment,
+def log_mlflow_metrics(
     y_pred: np.ndarray,
-    y_valid: np.ndarray,
-) -> None:
-    acc, f1, precision, recall, roc_auc = compute_accuracy_metrics(y_pred, y_valid)
-    experiment.log_metric("Accuracy", acc)
-    experiment.log_metric("F1 Score", f1)
-    experiment.log_metric("Precision", precision)
-    experiment.log_metric("Recall", recall)
-    experiment.log_metric("ROC", roc_auc)
+    y_valid: pd.Series,
+) -> Dict[str, float]:
+    # convert y_valid from pd.Series to numpy array
+    y_valid_array = y_valid.to_numpy()
+    acc, f1, precision, recall, roc_auc = compute_accuracy_metrics(y_pred, y_valid_array)
+    return {
+        "Accuracy": acc,
+        "F1 Score": f1,
+        "Precision": precision,
+        "Recall": recall,
+        "ROC AUC Score": roc_auc,
+    }
 
 
 def log_metrics_terminal(
     y_pred: np.ndarray,
     y_valid: np.ndarray,
-) -> None:
+) -> dict:
     acc, f1, precision, recall, roc_auc = compute_accuracy_metrics(y_pred, y_valid)
     logger.info(f"Accuracy: {acc}")
     logger.info(f"F1 Score: {f1}")
     logger.info(f"Precision: {precision}")
     logger.info(f"Recall: {recall}")
     logger.info(f"ROC AUC Score: {roc_auc}")
-
-
-def get_tracking_api_experiment(exp_key: str) -> APIExperiment:
-    api = API(api_key=os.environ["API_KEY"])
-    api_experiment = api.get_experiment_by_key(exp_key)
-    if api_experiment is None:
-        logger.error(f"Experiment with key {exp_key} not found.")
-        raise ValueError("Experiment with key {exp_key} not found")
-    return api_experiment
-
-
-def get_matching_experiments() -> Union[list[Any] | list[APIExperiment | None], None]:
-    query_condition = (Metric("train_Accuracy") > 0.75) & (
-        Metric("train_Accuracy") < 0.9
-    )
-    WORKSPACE_NAME = os.environ["WORKSPACE_NAME"]
-    PROJECT_NAME = os.environ["PROJECT_NAME"]
-    api = API(api_key=os.environ["API_KEY"])
-    matching_api_experiments = api.query(WORKSPACE_NAME, PROJECT_NAME, query_condition)
-    return matching_api_experiments
+    return {
+        "Accuracy": acc,
+        "F1 Score": f1,
+        "Precision": precision,
+        "Recall": recall,
+        "ROC AUC Score": roc_auc,
+    }
 
 
 def get_chosen_model_from_search(
@@ -289,6 +266,7 @@ def get_chosen_model_from_search(
     raise ValueError("Could not find the model for the given model name.")
 
 
+@memory.cache
 def feature_scaling(
     X_train: pd.DataFrame, X_valid: pd.DataFrame
 ) -> tuple[
@@ -296,20 +274,28 @@ def feature_scaling(
     np.ndarray[Any, Any] | spmatrix,
     np.ndarray[Any, Any] | spmatrix,
 ]:
-    column_transformer = get_column_transformer(X_train)
-    X_train_scaled = column_transformer.fit_transform(X_train)
-    X_valid_scaled = column_transformer.transform(X_valid)
+    # now we need to exclude the last column from the feature scaling which is timestamp and has data type of datetime
+    X_train_to_be_scaled = X_train.iloc[:, :-1]
+    X_valid_to_be_scaled = X_valid.iloc[:, :-1]
+    column_transformer = get_column_transformer(X_train_to_be_scaled)
+    X_train_scaled = column_transformer.fit_transform(X_train_to_be_scaled)
+    X_valid_scaled = column_transformer.transform(X_valid_to_be_scaled)
     logger.info("Feature scaling completed successfully")
     return column_transformer, X_train_scaled, X_valid_scaled
 
 
-def saving_model_object_zip_file(
-    best_model: BaseEstimator, experiment: Experiment
-) -> None:
-    model_filename = "best_model.pkl"
-    with open(model_filename, "wb") as f:
-        pickle.dump(best_model, f)
+def get_best_performing_model(
+    all_model_dict: Dict[str, Tuple[float, str]],
+) -> Tuple[str, str]:
+    """the model names should be arranged based on accuracy performance and the best model should be returned"""
+    if not all_model_dict:
+        raise ValueError("all_model_dict is nonexistent")
+    best_model = max(all_model_dict, key=lambda x: all_model_dict[x][0])
+    best_model_path = all_model_dict[best_model][1]
+    return best_model, best_model_path
 
-    experiment.log_model("Best Model", model_filename)
-    logger.info("Model object saved as a zip file")
-    os.remove(model_filename)
+
+def load_local_model(model_path: str) -> Any:
+    """loads a local model from the provided path"""
+    with open(model_path, "rb") as file:
+        return joblib.load(file)
