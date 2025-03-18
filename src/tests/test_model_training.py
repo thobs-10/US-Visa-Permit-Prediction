@@ -11,6 +11,7 @@ from src.components.model_training import (
 )
 from src.entity.config_entity import ModelTrainingConfig
 from sklearn.compose import ColumnTransformer
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def test_split_data_success():
@@ -103,31 +104,56 @@ def test_train_model_success():
             "other_column": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         }
     )
-    y_train = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
-    y_valid = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+    y_train = pd.Series([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+    y_valid = pd.Series([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
     mock_column_transformer = MagicMock(spec=ColumnTransformer)
     mock_X_train_scaled = np.array([[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]])
     mock_X_valid_scaled = np.array([[1, 2], [3, 4], [5, 6], [7, 8], [9, 10]])
-    mock_y_pred = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
-    mock_model_path = "model.pkl"  # this can be a string that is formed from by the comet_ml library which cab anything
-    with patch(
-        "src.components.model_training.feature_scaling",
-        return_value=(
-            mock_column_transformer,
-            mock_X_train_scaled,
-            mock_X_valid_scaled,
+    mock_results = {
+        "model_1": (np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]), "model_1_path"),
+        "model_2": (np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1]), "model_2_path"),
+    }
+
+    mock_mlflow = MagicMock()
+    mock_executor = MagicMock(spec=ThreadPoolExecutor)
+    mock_future = MagicMock()
+    mock_future.result.return_value = (np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]), "model_1_path")
+
+    with (
+        patch(
+            "src.components.model_training.feature_scaling",
+            return_value=(
+                mock_column_transformer,
+                mock_X_train_scaled,
+                mock_X_valid_scaled,
+            ),
+        ),
+        patch(
+            "src.components.model_training.train_model_parallel",
+            return_value=mock_results,
+        ),
+        patch("src.components.model_training.mlflow", mock_mlflow),
+        patch(
+            "src.components.model_training.ThreadPoolExecutor",
+            return_value=mock_executor,
+        ),
+        patch(
+            "src.components.model_training.as_completed",
+            return_value=[mock_future],
         ),
     ):
-        with patch(
-            "src.components.model_training.train_and_save",
-            return_value=(mock_y_pred, mock_model_path),
-        ):
-            result = train_model(X_train, X_valid, y_train, y_valid)
-            assert len(result) == 2
-            assert isinstance(result[0], str)
-            assert isinstance(result[1], ColumnTransformer)
-            # assert result[0] == mock_model_path
-            assert result[1] == mock_column_transformer
+        result = train_model(X_train, X_valid, y_train, y_valid)
+
+        assert isinstance(result, tuple)
+        assert len(result) == 3
+        assert result[0] == mock_column_transformer
+        assert isinstance(result[1], str)
+        assert isinstance(result[2], str)
+
+        mock_mlflow.set_experiment.assert_called_once_with("Model Training Phase")
+        mock_mlflow.set_experiment_tag.assert_called_once_with("model-training", "v1.0.0")
+        mock_mlflow.start_run.assert_called()
+        mock_mlflow.log_metrics.assert_called()
 
 
 def test_save_preprocessor_successfully():
@@ -141,9 +167,7 @@ def test_save_preprocessor_successfully():
         ):
             output_path = os.path.join(model_artifact_dir, "preprocessor.joblib")
             results = save_preprocessor(mock_column_transformer)
-            mock_joblib_dump.assert_called_once_with(
-                mock_column_transformer, output_path
-            )
+            mock_joblib_dump.assert_called_once_with(mock_column_transformer, output_path)
             assert results is None
 
 
