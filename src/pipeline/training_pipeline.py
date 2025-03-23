@@ -13,6 +13,7 @@ from src.components.model_registry import register_model
 from zenml import pipeline
 
 
+@pipeline
 def run_model_training() -> None:
     try:
         logger.info("Starting model training pipeline")
