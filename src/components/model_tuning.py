@@ -55,6 +55,7 @@ def hyperparameter_tuning(
         verbose=2,
         n_jobs=mp.cpu_count(),
         random_state=42,
+        scoring="accuracy",
     )
     X_train_scaled = column_transformer.fit_transform(X_train)  # type: ignore
     X_valid_scaled = column_transformer.transform(X_val)  # type: ignore
