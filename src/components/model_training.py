@@ -57,7 +57,7 @@ def load_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
         raise e
 
 
-# @step
+@step
 @memory.cache
 def split_data(
     X: pd.DataFrame, y: pd.DataFrame
@@ -118,7 +118,7 @@ def train_model_parallel(
     return results
 
 
-# @step
+@step
 def train_model(
     X_train: pd.DataFrame,
     X_valid: pd.DataFrame,
@@ -162,7 +162,7 @@ def train_model(
     return column_transformer, chosen_model_path, best_model
 
 
-# @step
+@step
 def save_preprocessor(
     preprocessor: ColumnTransformer, filename: str = "preprocessor.joblib"
 ) -> None:
@@ -175,7 +175,7 @@ def save_preprocessor(
         raise e
 
 
-# @step
+@step
 def save_training_data(
     X_train: pd.DataFrame,
     X_valid: pd.DataFrame,

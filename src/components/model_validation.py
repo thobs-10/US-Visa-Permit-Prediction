@@ -17,8 +17,10 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from src.entity.config_entity import ModelTuningConfig
 from src.utils.main_utils import log_metrics_terminal
+from zenml import step
 
 
+@step
 def model_evaluation(
     X_test: pd.DataFrame,
     y_test: pd.Series,
@@ -48,11 +50,10 @@ def model_evaluation(
     return model_pipeline
 
 
+@step
 def save_model_pipeline(model_pipeline: Pipeline) -> None:
     try:
-        model_path = os.path.join(
-            ModelTuningConfig.model_artifact_dir, " model_pipeline"
-        )
+        model_path = os.path.join(ModelTuningConfig.model_artifact_dir, " model_pipeline")
         os.makedirs(model_path, exist_ok=True)
         joblib.dump(model_pipeline, os.path.join(model_path, "model_pipeline.pkl"))
         logger.info(f"Saving model pipeline to {model_path}")

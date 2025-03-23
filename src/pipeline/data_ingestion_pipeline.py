@@ -14,7 +14,6 @@ from zenml import pipeline
 def run_data_ingestion() -> None:
     try:
         logger.info("Starting data ingestion pipeline")
-        # data_ingestion = DataIngestion()
         raw_data = load_data()
         cleaned_data = handling_null_values(raw_data)
         cleaned_data = handling_data_type(cleaned_data)
@@ -26,5 +25,4 @@ def run_data_ingestion() -> None:
 
 
 if __name__ == "__main__":
-    # data_pipeline = DataIngestionPipeline()
     run_data_ingestion()

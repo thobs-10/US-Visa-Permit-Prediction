@@ -16,12 +16,13 @@ import multiprocessing as mp
 import mlflow
 from mlflow.models import infer_signature
 from mlflow.tracking import MlflowClient
+from zenml import step
 
 
 tracking_uri = mlflow.get_tracking_uri()
 mlflow_client = MlflowClient(tracking_uri=tracking_uri)
 
-
+@step
 def hyperparameter_tuning(
     X_train: pd.DataFrame,
     X_val: pd.DataFrame,
