@@ -98,7 +98,6 @@ search_space = {
 
 # Models list for Hyperparameter tuning
 randomcv_models = [
-    # ('XGBClassifier', XGBClassifier(), search_space['XGBClassifier']),
     ("Random_Forest", RandomForestClassifier(), search_space["Random_Forest"]),
     ("K-Neighbors_Classifier", KNeighborsClassifier(), search_space["K-Neighbors_Classifier"]),
     ("Decision_Tree", DecisionTreeClassifier(), search_space["Decision_Tree"]),
@@ -106,5 +105,4 @@ randomcv_models = [
     ("Logistic_Regression", LogisticRegression(), search_space["Logistic_Regression"]),
     ("Support_Vector_Classifier", SVC(), search_space["Support_Vector_Classifier"]),
     ("AdaBoost_Classifier", AdaBoostClassifier(), search_space["AdaBoost_Classifier"]),
-    # ('CatBoosting_Classifier', CatBoostClassifier(verbose=False), search_space['CatBoosting_Classifier'])
 ]
