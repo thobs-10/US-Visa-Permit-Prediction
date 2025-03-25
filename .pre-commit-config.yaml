@@ -71,7 +71,7 @@ repos:
     rev: "v1.2.0"
     hooks:
       - id: mypy
-        args: [--no-strict-optional, --ignore-missing-imports]
+        args: [--no-strict-optional]
 
   - repo: https://github.com/pycqa/flake8
     rev: "6.0.0" # pick a git hash / tag to point to
