@@ -13,9 +13,6 @@ import uvicorn
 
 app = FastAPI()
 
-# Set up logging
-logging.basicConfig(filename='predictions.log', level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Load the model and preprocessor when the app starts
 def get_preprocessor():
