@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  zenml_server:
+    image: zenmldocker/zenml-server:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - zenml_data:/var/lib/zenml
+    networks:
+      - mlops_network
+  # data_ingestion:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   command: python data_ingestion_pipeline.py
+  #   networks:
+  #     - mlops_network
+
+volumes:
+  zenml_data:
+    # postgres_data:
+
+
+networks:
+  mlops_network:
+    driver: bridge
