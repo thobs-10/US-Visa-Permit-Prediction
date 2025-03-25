@@ -37,6 +37,23 @@ class ModelInput(BaseModel):
     prevailing_wage: float
 
 
+def generate_input_dataframe(input_data: ModelInput) -> pd.DataFrame:
+    input_dict = {
+        "continent": [input_data.continent],
+        "education_of_employee": [input_data.education_of_employee],
+        "has_job_experience": [input_data.has_job_experience],
+        "requires_job_training": [input_data.requires_job_training],
+        "no_of_employees": [input_data.no_of_employees],
+        "region_of_employment": [input_data.region_of_employment],
+        "prevailing_wage": [input_data.prevailing_wage],
+        "unit_of_wage": [input_data.unit_of_wage],
+        "full_time_position": [input_data.full_time_position],
+        "company_age": [input_data.company_age],
+    }
+    input_df = pd.DataFrame(input_dict)
+    return input_df
+
+
 @app.post("/predict")
 async def prediction(input_data: ModelInput):
     try:
