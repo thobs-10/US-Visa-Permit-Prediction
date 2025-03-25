@@ -170,9 +170,7 @@ us-visa-project/
 *.code-workspace
 .editorconfig
 
-# Ignore YAML configuration files
-*.yaml
-*.yml
+# Ignore configuration files
 .zen
 src/components/scatchpad.ipynb
 /data
