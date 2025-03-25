@@ -1,0 +1,13 @@
+[MASTER]
+ignore=CVS,build,docs,.venv
+
+[MESSAGES CONTROL]
+disable=
+    C0114, # missing-module-docstring
+    C0115, # missing-class-docstring
+    C0116, # missing-function-docstring
+    R0903, # Too few public methods
+    W0511, # TODO
+    W0603, # Using the global statement
+    W0613, # Unused argument
+    E1101, # No member
