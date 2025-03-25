@@ -22,24 +22,7 @@ def get_registered_model() -> Pipeline:
         return model_pipeline
     except Exception as e:
         logger.error(f"Error loading preprocessor: {e}")
-        raise HTTPException(status_code=500, detail=f"Error loading preprocessor: {str(e)}")
-    return preprocessor
 
-def get_registered_model():
-    try:
-        output_path = os.path.abspath('src/models/best_model')
-        latest_file = os.path.join(output_path,'Decision_Tree.pkl')
-        model = joblib.load(latest_file)
-        return model
-    except Exception as e:
-        logger.error(f"Error loading model: {e}")
-        raise HTTPException(status_code=500, detail=f"Error loading model: {str(e)}")
-
-try:
-    model = get_registered_model()
-    preprocessor = get_preprocessor()
-except Exception as e:
-    raise RuntimeError(f"Error loading model: {str(e)}")
 
 class ModelInput(BaseModel):
     education_of_employee: Literal["High School", "Master's", "Bachelor's", "Doctorate"]
