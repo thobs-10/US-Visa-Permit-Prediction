@@ -14,12 +14,12 @@ import uvicorn
 app = FastAPI()
 
 
-# Load the model and preprocessor when the app starts
-def get_preprocessor():
+def get_registered_model() -> Pipeline:
     try:
-        output_path = os.path.abspath('src/models/best_model')
-        preprocessor_path = os.path.join(output_path, 'preprocessor.pkl')
-        preprocessor = joblib.load(preprocessor_path)
+        output_path = os.path.abspath("src/models/tuning_aartifacts/model_pipeline")
+        model_pipeline_path = os.path.join(output_path, "model_pipeline.pkl")
+        model_pipeline = joblib.load(model_pipeline_path)
+        return model_pipeline
     except Exception as e:
         logger.error(f"Error loading preprocessor: {e}")
         raise HTTPException(status_code=500, detail=f"Error loading preprocessor: {str(e)}")
