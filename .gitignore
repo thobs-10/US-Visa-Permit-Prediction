@@ -157,7 +157,6 @@ __pypackages__/
 poetry.lock
 .pdm.toml
 .pdm.lock
-pyproject.toml
 us-visa-project/
 # Environment variable files
 .env
