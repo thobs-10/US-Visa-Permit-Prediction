@@ -1,0 +1,66 @@
+name: CI/CD pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dockerbuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker Image
+        run: docker build . --file Dockerfile --tag workflow-test:$(date +%s)
+
+  install-and-test:
+    needs: dockerbuild
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+          cache: 'pip'
+      - name: Install dependencies and package
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install pre-commit pytest pytest-xdist pytest-cov pytest-instafail pytest-randomly
+          pip install .
+      - name: Analysing the code with ruff and pre-commit
+        run: |
+          source venv/bin/activate
+          SKIP=no-commit-to-branch pre-commit run --all-files
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          pytest -n auto --cov=src --instafail --randomly
+
+  push-and-publish:
+    needs: install-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Dockerhub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64, linux/arm64, linux/x86_64
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/project-app:latest
+      - name: Image Digest
+        run: echo ${{ steps.push-and-publish.outputs.digest }}
+    
