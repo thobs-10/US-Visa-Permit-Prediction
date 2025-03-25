@@ -57,26 +57,8 @@ def generate_input_dataframe(input_data: ModelInput) -> pd.DataFrame:
 @app.post("/predict")
 async def prediction(input_data: ModelInput):
     try:
-        input_dict = {
-            "continent": [input_data.continent],
-            "education_of_employee": [input_data.education_of_employee],
-            "has_job_experience": [input_data.has_job_experience],
-            "requires_job_training": [input_data.requires_job_training],
-            "no_of_employees": [input_data.no_of_employees],
-            "region_of_employment": [input_data.region_of_employment],
-            "prevailing_wage": [input_data.prevailing_wage],
-            "unit_of_wage": [input_data.unit_of_wage],
-            "full_time_position": [input_data.full_time_position],
-            "company_age": [input_data.company_age]
-        }
-
-        input_df = pd.DataFrame(input_dict)
-
-        # logger.info(f"Input features: {input_dict}")
-
-        X = preprocessor.transform(input_df)
-
-        if np.isnan(X).any():
+        input_df = generate_input_dataframe(input_data)
+        if np.isnan(input_df).any():
             logger.error("NaN values found in the transformed data")
             raise HTTPException(status_code=400, detail="NaN values found in the transformed data")
 
