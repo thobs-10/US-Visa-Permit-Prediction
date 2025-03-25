@@ -62,14 +62,14 @@ async def prediction(input_data: ModelInput):
             logger.error("NaN values found in the transformed data")
             raise HTTPException(status_code=400, detail="NaN values found in the transformed data")
 
-        prediction = model.predict(X)
+        model_pipeline = get_registered_model()
+        prediction = model_pipeline.predict(input_df)
         logger.info(f"Model prediction: {prediction[0].item()}")
-
 
         return {"prediction": prediction[0].item()}
     except Exception as e:
         logger.error(f"Prediction error: {e}")
-        raise HTTPException(status_code=400, detail=f"Prediction error: {str(e)}")
+
 
 @app.get("/")
 async def read_root():
