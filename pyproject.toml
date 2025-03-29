@@ -38,14 +38,14 @@ dev = ["black==24.1.1", "isort==5.13.2", "pylint==3.1.0", "ruff==0.4.4", "setupt
 write_to = "src/us_visa_prediction_mlops_project/_version.py"  # Optional: write version to a file
 
 [tool.black]
-line-length = 119
+line-length = 200
 exclude = ["venv", ".venv", "us-visa-project"]
 
 [tool.isort]
 profile = "black"
 multi_line_output = "VERTICAL_HANGING_INDENT"
 force_grid_wrap = 2
-line_length = 99
+line_length = 200
 
 [tool.pylint."messages control"]
 disable = [
@@ -68,7 +68,7 @@ ignore = ["E501", "F401"]
 # Avoid trying to fix flake8-bugbear (`B`) violations.
 unfixable = ["B"]
 
-line-length = 99
+line-length = 200
 
 # Ignore `E402` (import violations) in all `__init__.py` files.
 [tool.ruff.per-file-ignores]
