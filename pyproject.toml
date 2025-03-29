@@ -32,7 +32,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black==24.1.1", "isort==5.13.2", "pylint==3.1.0", "ruff==0.4.4"]
+dev = ["black==24.1.1", "isort==5.13.2", "pylint==3.1.0", "ruff==0.4.4", "setuptools_scm>=57.4.0"]
+
+[tool.setuptools_scm]
+write_to = "src/us_visa_prediction_mlops_project/_version.py"  # Optional: write version to a file
 
 [tool.black]
 line-length = 119
