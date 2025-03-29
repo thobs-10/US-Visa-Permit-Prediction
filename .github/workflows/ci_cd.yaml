@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [main]
   workflow_dispatch:
 
@@ -18,8 +19,13 @@ jobs:
   install-and-test:
     needs: dockerbuild
     runs-on: ubuntu-latest
+    outputs:
+      version_tag: ${{ steps.extract_version.outputs.VERSION }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
 
       - name: Set up python
         uses: actions/setup-python@v4
@@ -27,12 +33,26 @@ jobs:
           python-version: '3.8'
           cache: 'pip'
 
-      - name: Install dependencies and package
+      - name: Extract version from pyproject.toml
+        id: extract_version
+        run: |
+          source venv/bin/activate
+          VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          git tag $VERSION
+          git push origin $VERSION
+
+      - name: Create venv and install packages
         run: |
           python -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install pre-commit pytest pytest-xdist pytest-cov pytest-instafail pytest-randomly
+
+      - name: Install project dependencies
+        run: |
+          source venv/bin/activate
+          pip install -e.[dev]
           pip install .
 
       - name: Analysing the code with ruff and pre-commit
@@ -48,6 +68,7 @@ jobs:
   push-and-publish:
     needs: install-and-test
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -68,7 +89,7 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64, linux/arm64, linux/x86_64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlops-project:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/us-visa-prediction-mlops-project:latest-${{ secrets.DOCKERHUB_USERNAME }}/us-visa-prediction-mlops-project:${{ needs.install-and-test.outputs.version_tag }}
 
       - name: Image Digest
         run: echo ${{ steps.push-and-publish.outputs.digest }} # type: ignore
