@@ -18,3 +18,5 @@ disable=
     C0305, # Trailing newlines
     C0103, # Variable name "x" doesn't conform to snake_case naming style
     E1136, # Value of type "None" is unsubscriptable
+    R0914, # Too many local variables
+    W0631, # Using possibly undefined loop variable
