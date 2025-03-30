@@ -10,5 +10,11 @@ disable=
     W0603, # Using the global statement
     W0613, # Unused argument
     E1101, # No member
-
-line-length=200
+    E0401, # Import-error
+    C0301, # Line too long
+    C0302, # Too many lines in module
+    C0303, # Trailing whitespace
+    C0304, # Final newline missing
+    C0305, # Trailing newlines
+    C0103, # Variable name "x" doesn't conform to snake_case naming style
+    E1136, # Value of type "None" is unsubscriptable
