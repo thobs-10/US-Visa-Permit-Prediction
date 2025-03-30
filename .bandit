@@ -1,3 +1,33 @@
 [bandit]
-skips: [B101, B110, B301, B303, B304, B305, B306, B307, B308, B310, B311, B312, B313, B314, B315, B316, B317, B318, B319, B320, B322, B401, B402, B403, B404, B405, B406, B407, B408, B409, B410, B411, B412, B413, B414, B415, B416, B417, B418, B419, B420, B421, B422, B423, B424, B425, B426, B427,]
-exclude: tests/
+# Only skip specific checks with good justification
+skips:
+  - B101,
+  - B404,
+  - B603,
+
+# Exclude directories that don't need security scanning
+exclude:
+    tests/,
+    docs/,
+    .venv/,
+    venv/,
+    build/,
+    dist/
+
+# Target directory (matches your hook args)
+targets: .
+
+# Aggressiveness level (default is 'low')
+level: low
+
+# Output format (default is 'screen')
+output_format: screen
+
+# Number of lines to show around issues (default is 5)
+lines: 3
+
+# Confidence filters (default includes all confidence levels)
+confidence:
+    high,
+    medium,
+    low
