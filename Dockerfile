@@ -35,6 +35,6 @@ COPY --from=builder /app /app
 RUN mkdir -p /app/src/models/tuning_artifacts/model_pipeline
 RUN mkdir -p /app/src/models/artifacts
 
-EXPOSE 8080
+EXPOSE 8000
 
-CMD ["uvicorn", "app:app", "--reload", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "app:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]

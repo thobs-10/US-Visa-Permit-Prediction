@@ -1,27 +1,27 @@
-import logging
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import numpy as np
-import joblib
 import os
-import pandas as pd
-from datetime import datetime
 from typing import Literal
-from loguru import logger
-from sklearn.pipeline import Pipeline
+
+import joblib
+import numpy as np
+import pandas as pd
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from loguru import logger
+from pydantic import BaseModel
+from sklearn.pipeline import Pipeline
 
 app = FastAPI()
 
 
-def get_registered_model() -> Pipeline:
+def get_registered_model() -> Pipeline | None:
     try:
-        output_path = os.path.abspath("src/models/tuning_aartifacts/model_pipeline")
+        output_path = os.path.abspath("src/models/tuning_artifacts/model_pipeline")
         model_pipeline_path = os.path.join(output_path, "model_pipeline.pkl")
         model_pipeline = joblib.load(model_pipeline_path)
         return model_pipeline
-    except Exception as e:
+    except FileNotFoundError as e:
         logger.error(f"Error loading preprocessor: {e}")
+        return None
 
 
 class ModelInput(BaseModel):
@@ -63,11 +63,11 @@ async def prediction(input_data: ModelInput):
             raise HTTPException(status_code=400, detail="NaN values found in the transformed data")
 
         model_pipeline = get_registered_model()
-        prediction = model_pipeline.predict(input_df)
-        logger.info(f"Model prediction: {prediction[0].item()}")
+        pred = model_pipeline.predict(input_df)
+        logger.info(f"Model prediction: {pred[0].item()}")
 
-        return {"prediction": prediction[0].item()}
-    except Exception as e:
+        return {"prediction": pred[0].item()}
+    except ConnectionError as e:
         logger.error(f"Prediction error: {e}")
 
 
@@ -79,7 +79,7 @@ async def read_root():
 if __name__ == "__main__":
     uvicorn.run(
         "app:app",
-        host="0.0.0.0",
+        host="127.0.0.1",
         port=8000,
         reload=True,
     )
