@@ -1,18 +1,17 @@
 import os
 from dataclasses import dataclass
-from datetime import datetime
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
+from scipy.stats import loguniform, randint, uniform
 from sklearn.ensemble import (
-    RandomForestClassifier,
     AdaBoostClassifier,
     GradientBoostingClassifier,
+    RandomForestClassifier,
 )
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
-from scipy.stats import uniform, norm, loguniform, randint
+from sklearn.tree import DecisionTreeClassifier
 
 root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv(dotenv_path=os.path.join(root_dir, ".env"))
