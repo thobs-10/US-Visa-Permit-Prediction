@@ -29,6 +29,9 @@ dependencies = [
     "pytest-instafail>=0.5.0",
     "pytest-randomly>=3.16.0",
     "pre_commit>=4.2.0",
+    "loguru>=0.7.3",
+    "pydantic>=2.8.2",
+    "uvicorn>=0.34.0",
 ]
 
 [project.optional-dependencies]
