@@ -1,16 +1,18 @@
-from loguru import logger
-from sklearn.pipeline import Pipeline
 import mlflow
-from mlflow.entities import ViewType
+from loguru import logger
 from mlflow.client import MlflowClient
+from mlflow.entities import ViewType
+from sklearn.pipeline import Pipeline
+from zenml import step
 
 tracking_uri = mlflow.get_tracking_uri()
 client = MlflowClient(tracking_uri=tracking_uri)
 
 
+@step
 def register_model(model_pipeline: Pipeline) -> None:
     """
-    Registers the best model from the hyperparameter tuning experiment in MLflow.
+    Register the best model from the hyperparameter tuning experiment in MLflow.
 
     Parameters:
     best_model (BaseEstimator): The best model to be registered.

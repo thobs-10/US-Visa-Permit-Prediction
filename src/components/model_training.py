@@ -135,15 +135,15 @@ def train_model(
         logger.info(f"logging results for model: {model_name}: path: {model_path}")
         with mlflow.start_run():
             mlflow.set_tag("model-training:", model_name)
-            signature = infer_signature(X_valid_scaled, float(y_pred))
+            signature = infer_signature(X_valid_scaled, y_pred)
             mlflow.sklearn.log_model(
                 sk_model=str(model_path),
                 artifact_path="model",
                 signature=signature,
                 registered_model_name=model_name,
             )
-            logger.info(f"y_pred: {float(y_pred)} and type:{type(float(y_pred))}")
-            metrics_dict = log_mlflow_metrics(np.array(float(y_pred)), y_valid)
+            logger.info(f"y_pred: {y_pred} and type:{type(y_pred)}")
+            metrics_dict = log_mlflow_metrics(np.array(y_pred), y_valid)
             mlflow.log_metrics(metrics=metrics_dict)
             model_performance_dict[model_name] = (metrics_dict["Accuracy"], str(model_path))
     logger.info("models trained and evaluated successfully")
