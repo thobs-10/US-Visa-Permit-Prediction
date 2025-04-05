@@ -1,26 +1,22 @@
+import multiprocessing as mp
 from typing import Any
+
+import mlflow
 import mlflow.artifacts
 import pandas as pd
 from loguru import logger
-from src.utils.main_utils import (
-    log_mlflow_metrics,
-    load_local_model,
-)
-from src.entity.config_entity import randomcv_models
-from sklearn.model_selection import (
-    RandomizedSearchCV,
-    KFold,
-)
-from sklearn.compose import ColumnTransformer
-import multiprocessing as mp
-import mlflow
 from mlflow.models import infer_signature
 from mlflow.tracking import MlflowClient
+from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import KFold, RandomizedSearchCV
 from zenml import step
 
+from src.entity.config_entity import randomcv_models
+from src.utils.main_utils import load_local_model, log_mlflow_metrics
 
 tracking_uri = mlflow.get_tracking_uri()
 mlflow_client = MlflowClient(tracking_uri=tracking_uri)
+
 
 @step
 def hyperparameter_tuning(
@@ -31,11 +27,13 @@ def hyperparameter_tuning(
     chosen_model_path: str,
     chosen_model_name: str,
     column_transformer: ColumnTransformer,
-    max_evals: int = 5,
 ) -> Any:
-    """create new experiment for hyperparameter tuning using mlflow, get model assets from previous experiments and
-    perform hyperparameter tuning and log the model parameters"""
+    """
+    Create new experiment for hyperparameter tuning using mlflow.
 
+    Get model assets from previous experiments and perform hyperparameter tuning
+    and log the model parameters.
+    """
     mlflow.set_experiment("Hyperparameter Tuning Phase")
     mlflow.set_experiment_tag("model-tuning", "v1.0.0")
 
@@ -46,7 +44,7 @@ def hyperparameter_tuning(
     tuple_item = [item for item in randomcv_models if item[0] == chosen_model_name]
     if not tuple_item:
         raise ValueError("Could not find the model for the given model name.")
-    model_name, chosen_model, search_space = tuple_item[0]
+    model_name, _, search_space = tuple_item[0]
     kf = KFold(n_splits=2, shuffle=True, random_state=42)
     random_cv_model = RandomizedSearchCV(
         estimator=model,
