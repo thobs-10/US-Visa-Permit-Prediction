@@ -126,7 +126,8 @@ ehthumbs.db
 data/
 output/
 logs/
-models/
+# models/
+src/models/artifacts
 checkpoints/
 mlops_zoomcamp_course_final_project.egg-info/
 us-visa-permit/
@@ -137,7 +138,8 @@ us-visa-permit/
 *.hdf5
 *.parquet
 *.pickle
-*.pkl
+# *.pkl
+*.joblib
 
 # Ignore large files
 *.tar.gz
