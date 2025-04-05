@@ -47,7 +47,6 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install pre-commit pytest pytest-xdist pytest-cov pytest-instafail pytest-randomly
 
       - name: Install project dependencies
         run: |
