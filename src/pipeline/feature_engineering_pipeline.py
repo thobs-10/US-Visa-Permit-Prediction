@@ -1,10 +1,11 @@
 from loguru import logger
 from zenml import pipeline
+
 from src.components.feature_engineering import (
-    load_data,
     feature_extraction,
-    removing_outliers,
     feature_transformations,
+    load_data,
+    removing_outliers,
     save,
     save_to_feast_feature_store,
 )
