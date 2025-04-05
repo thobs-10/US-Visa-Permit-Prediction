@@ -1,12 +1,13 @@
-from src.components.data_ingestion import (
-    load_data,
-    handling_null_values,
-    handling_data_type,
-    handling_duplicates,
-    save,
-)
 from loguru import logger
 from zenml import pipeline
+
+from src.components.data_ingestion import (
+    handling_data_type,
+    handling_duplicates,
+    handling_null_values,
+    load_data,
+    save,
+)
 
 
 # class DataIngestionPipeline:
