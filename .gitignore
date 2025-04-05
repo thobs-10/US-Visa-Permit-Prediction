@@ -138,7 +138,7 @@ us-visa-permit/
 *.hdf5
 *.parquet
 *.pickle
-# *.pkl
+*.pkl
 *.joblib
 
 # Ignore large files
