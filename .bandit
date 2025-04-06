@@ -1,33 +1,41 @@
 [bandit]
 # Only skip specific checks with good justification
-skips:
-  - B101,
-  - B404,
-  - B603,
+
+# .bandit.yaml
+---
+# Bandit configuration file
+
+# Skip specific checks with good justification
+skip:
+  - B101 # assert used
+  - B404 # subprocess import
+  - B603 # subprocess call with shell=True
 
 # Exclude directories that don't need security scanning
-exclude:
-    tests/,
-    docs/,
-    .venv/,
-    venv/,
-    build/,
-    dist/
+exclude_dirs:
+  - src/tests/
+  - docs/
+  - .venv/
+  - venv/
+  - build/
+  - dist/
 
-# Target directory (matches your hook args)
-targets: .
+# Target directory to scan
+targets:
+  - .
 
-# Aggressiveness level (default is 'low')
-level: low
+# Aggressiveness level (low, medium, high)
+aggregate:
+  - low
 
-# Output format (default is 'screen')
+# Output format (screen, json, csv, xml)
 output_format: screen
 
-# Number of lines to show around issues (default is 5)
-lines: 3
+# Number of lines to show around issues
+context_lines: 3
 
-# Confidence filters (default includes all confidence levels)
+# Confidence levels to include (high, medium, low)
 confidence:
-    high,
-    medium,
-    low
+  - high
+  - medium
+  - low

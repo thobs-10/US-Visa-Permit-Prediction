@@ -86,4 +86,4 @@ repos:
     rev: "1.7.0"
     hooks:
       - id: bandit
-        args: ["-r", ".bandit"]
+        args: ["-c", ".bandit"]
