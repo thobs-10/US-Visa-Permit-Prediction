@@ -64,8 +64,39 @@ jobs:
           source venv/bin/activate
           pytest -n auto --cov=src --instafail --randomly
 
-  push-and-publish:
+  build-and-run-system:
     needs: install-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+          cache: 'pip'
+      - name: Create venv and install packages
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+      - name: Install project dependencies
+        run: |
+          source venv/bin/activate
+          pip install -e.[dev]
+          pip install .
+
+      - name: make bash script executable
+        run: |
+          chmod +x ./run.sh
+
+      - name: Run the bash script
+        run: |
+          ./run.sh run_pipelines
+
+  push-and-publish:
+    needs: [install-and-test, build-and-run-system]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
