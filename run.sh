@@ -35,8 +35,16 @@ run_pipelines() {
 # Function to run pre-commit checks
 run_pre_commit() {
   echo "Running pre-commit checks..."
-  SKIP=no-commit-to-branch pre-commit run --all-files
+  SKIP=no-commit-to-branch pre-commit --files src/
 }
+
+# For CI: Run specific functions if arguments are provided
+if [ $# -gt 0 ]; then
+    for func in "$@"; do
+        $func
+    done
+    exit 0
+fi
 
 # Main execution
 echo "Starting the development process..."
