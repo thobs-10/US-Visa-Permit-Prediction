@@ -21,3 +21,4 @@ disable=
     R0914, # Too many local variables
     W0631, # Using possibly undefined loop variable
     R0913, # Too many arguments
+    W1203, # use lazy % formatting in logging functions
