@@ -45,15 +45,15 @@ jobs:
           pip install -e.[dev]
           pip install .
 
-          - name: Extract version from pyproject.toml
-          id: extract_version
-          run: |
-            python -m venv venv
-            source venv/bin/activate
-            VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
-            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-            git tag $VERSION
-            git push origin $VERSION
+      - name: Extract version from pyproject.toml
+        id: extract_version
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          git tag $VERSION
+          git push origin $VERSION
 
       - name: Analysing the code with ruff and pre-commit
         run: |
