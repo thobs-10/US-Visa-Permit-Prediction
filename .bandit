@@ -1,4 +1,3 @@
-[bandit]
 # Only skip specific checks with good justification
 
 # .bandit.yaml
