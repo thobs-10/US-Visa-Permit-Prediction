@@ -1,15 +1,15 @@
-import pytest
-import os
-import pandas as pd
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
+
 import numpy as np
+import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import RandomizedSearchCV, KFold
+from sklearn.model_selection import KFold, RandomizedSearchCV
+
 from src.components.model_tuning import hyperparameter_tuning
 
 
 def test_hyperparameter_tuning_success():
-    """test successful hyperparameter tuning"""
+    """Test successful hyperparameter tuning."""
     X_train = pd.DataFrame(
         {
             "yr_of_estab": [2000, 2010, 2015, 2020, 2005, 1995, 2018, 2008, 2012, 2003],

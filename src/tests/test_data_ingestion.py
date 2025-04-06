@@ -1,16 +1,17 @@
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
+
 from src.components.data_ingestion import (
-    load_data,
-    handling_null_values,
     handling_data_type,
     handling_duplicates,
+    handling_null_values,
+    load_data,
 )
 
 
 def test_load_data_success(mock_raw_data_path, sample_data, mocker):
-    """testing load_data successfully"""
+    """Testing load_data successfully."""
     mock_read_csv = mocker.patch("pandas.read_csv", return_value=sample_data)
     data = load_data()
     mock_read_csv.assert_called_once_with("data/raw_data/EasyVisa.csv")
@@ -20,7 +21,7 @@ def test_load_data_success(mock_raw_data_path, sample_data, mocker):
 
 
 def test_load_data_exception(mock_raw_data_path, mocker):
-    """testing load_data with exception"""
+    """Testing load_data with exception."""
     mock_read_csv = mocker.patch("pandas.read_csv", side_effect=FileNotFoundError)
     with pytest.raises(FileNotFoundError):
         load_data()
@@ -28,17 +29,17 @@ def test_load_data_exception(mock_raw_data_path, mocker):
 
 
 def test_load_data_empty_file(mock_raw_data_path, mocker):
-    """testing load_data with an empty file"""
+    """Testing load_data with an empty file."""
     mock_read_csv = mocker.patch("pandas.read_csv", return_value=pd.DataFrame())
     data = load_data()
     mock_read_csv.assert_called_once_with("data/raw_data/EasyVisa.csv")
     assert data.empty
-    assert list(data.columns) == []
+    assert not list(data.columns)
     assert len(data) == 0
 
 
 def test_handling_null_values_no_nulls():
-    """testing handling_null_values with no nulls"""
+    """Testing handling_null_values with no nulls."""
     data = pd.DataFrame(
         {"col1": [1, 2, 3], "col2": ["A", "B", "C"]},
     )
@@ -48,7 +49,7 @@ def test_handling_null_values_no_nulls():
 
 
 def test_handling_null_values_numerical_nulls():
-    """testing handling_null_values with some nulls"""
+    """Testing handling_null_values with some nulls."""
     data = pd.DataFrame(
         {"col1": [1, 2, None], "col2": ["A", None, "C"]},
     )
@@ -59,7 +60,7 @@ def test_handling_null_values_numerical_nulls():
 
 
 def test_handling_null_values_category_nulls():
-    """testing handling_null_values with some nulls"""
+    """Testing handling_null_values with some nulls."""
     data = pd.DataFrame(
         {
             "col1": [1, 2, 3],
@@ -72,7 +73,7 @@ def test_handling_null_values_category_nulls():
 
 
 def test_handling_data_type_object():
-    """testing handling_data_type with object dtype"""
+    """Testing handling_data_type with object dtype."""
     data = pd.DataFrame(
         {
             "col1": [1, 2, 3],
@@ -86,7 +87,7 @@ def test_handling_data_type_object():
 
 
 def test_handling_data_type_numeric():
-    """testing handling_data_type with numeric dtype"""
+    """Testing handling_data_type with numeric dtype."""
     data = pd.DataFrame(
         {
             "col1": [1, 2, 3],
@@ -99,7 +100,7 @@ def test_handling_data_type_numeric():
 
 
 def test_handling_data_type_datetime():
-    """testing handling_data_type with datetime dtype"""
+    """Testing handling_data_type with datetime dtype."""
     data = pd.DataFrame(
         {
             "col1": [1, 2, 3],
@@ -112,7 +113,7 @@ def test_handling_data_type_datetime():
 
 
 def test_handling_data_type_unsupported():
-    """testing handling_data_type with unsupported dtype"""
+    """Testing handling_data_type with unsupported dtype."""
     data = pd.DataFrame(
         {
             "col1": [1, 2, 3],
@@ -126,7 +127,7 @@ def test_handling_data_type_unsupported():
 
 
 def test_handling_duplicates_present():
-    """testing handling_duplicates with duplicates"""
+    """Testing handling_duplicates with duplicates."""
     data = pd.DataFrame(
         {
             "col1": [1, 2, 3, 1],
@@ -139,7 +140,7 @@ def test_handling_duplicates_present():
 
 
 def test_handling_duplicates_none():
-    """testing handling_duplicates with no duplicates"""
+    """Testing handling_duplicates with no duplicates."""
     data = pd.DataFrame(
         {
             "col1": [1, 2, 3],
@@ -152,7 +153,7 @@ def test_handling_duplicates_none():
 
 
 def test_handling_duplicates_all():
-    """testing handling_duplicates with all duplicates"""
+    """Testing handling_duplicates with all duplicates."""
     data = pd.DataFrame(
         {
             "col1": [1, 1, 1, 1],

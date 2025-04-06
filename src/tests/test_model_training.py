@@ -1,17 +1,13 @@
-import pytest
 import os
-import pandas as pd
-from unittest.mock import patch, MagicMock
+from concurrent.futures import ThreadPoolExecutor
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from src.components.model_training import (
-    load_data,
-    split_data,
-    train_model,
-    save_preprocessor,
-)
-from src.entity.config_entity import ModelTrainingConfig
+import pandas as pd
+import pytest
 from sklearn.compose import ColumnTransformer
-from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from src.components.model_training import save_preprocessor, split_data, train_model
 
 
 def test_split_data_success():

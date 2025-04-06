@@ -1,14 +1,16 @@
-import pandas as pd
-import numpy as np
-import pytest
-from src.components.feature_engineering import (
-    load_data,
-    feature_extraction,
-    removing_outliers,
-    feature_transformations,
-)
-from unittest.mock import patch, MagicMock
 from datetime import date
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pandas as pd
+import pytest
+
+from src.components.feature_engineering import (
+    feature_extraction,
+    feature_transformations,
+    load_data,
+    removing_outliers,
+)
 
 
 def test_load_data_success():
