@@ -70,7 +70,7 @@ jobs:
       - name: Run tests
         run: |
           source venv/bin/activate
-          pytest -n auto --cov=src --instafail --randomly
+          pytest -n auto
 
   build-and-run-system:
     needs: install-and-test
