@@ -152,6 +152,36 @@ def test_train_model_success():
         mock_mlflow.log_metrics.assert_called()
 
 
+# def test_train_model_success():
+#     """Test with actual transformer instead of MagicMock."""
+#     X_train = pd.DataFrame(
+#         {
+#             "yr_of_estab": [2000, 2010, 2015, 2020, 2005, 1995, 2018, 2008, 2012, 2003],
+#             "other_column": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+#         }
+#     )
+#     X_valid = pd.DataFrame(
+#         {
+#             "yr_of_estab": [2000, 2010, 2015, 2020, 2005, 1995, 2018, 2008, 2012, 2003],
+#             "other_column": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+#         }
+#     )
+#     y_train = pd.Series([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+#     y_valid = pd.Series([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+
+#     # Patch dependencies to return serializable objects
+#     with patch(
+#         "src.components.model_training.feature_scaling",
+#         return_value=(
+#             ColumnTransformer([("scaler", StandardScaler(), [0])]),  # Real transformer
+#             np.array([[1.0], [2.0]]),  # Real arrays
+#             np.array([[1.5], [2.5]]),
+#         ),
+#     ):
+#         result = train_model(X_train, X_valid, y_train, y_valid)
+# assert "model_1" in result
+
+
 def test_save_preprocessor_successfully():
     """Test successful saving of preprocessor."""
     mock_column_transformer = MagicMock(spec=ColumnTransformer)

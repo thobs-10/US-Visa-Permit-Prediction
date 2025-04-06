@@ -53,7 +53,7 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 @step
-@memory.cache
+@memory.cache(ignore=["X", "y"])
 def split_data(
     X: pd.DataFrame, y: pd.DataFrame
 ) -> tuple[

@@ -1,5 +1,8 @@
+from unittest.mock import patch
+
 import pandas as pd
 import pytest
+from zenml.steps.base_step import BaseStep
 
 
 @pytest.fixture
@@ -17,3 +20,14 @@ def sample_data():
             "col2": ["A", "B", "C"],
         }
     )
+
+
+@pytest.fixture(autouse=True)
+def mock_zenml_runtime():
+    """Completely disable ZenML step execution during tests."""
+
+    def mock_step_call(self, *args, **kwargs):
+        return self.entrypoint(*args, **kwargs)
+
+    with patch.object(BaseStep, "__call__", new=mock_step_call), patch("zenml.steps.step_decorator.step", lambda x: x):  # Bypass @step decorator
+        yield

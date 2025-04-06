@@ -26,23 +26,24 @@ from src.utils.main_utils import (
 
 @step(enable_cache=False)
 def load_data() -> pd.DataFrame:
-    try:
-        logger.info("Loading cleaned data from processed folder")
-        processed_folder = DataPreprocessingConfig.processed_data_path
-        if not os.path.exists(processed_folder):
-            logger.warning("Cannot find processed folder")
-            return pd.DataFrame()
-        files = [f for f in os.listdir(processed_folder) if os.path.isfile(os.path.join(processed_folder, f))]
-        processed_files = [f for f in files if f.startswith("processed_data_")]
-        if not processed_files:
-            logger.warning("No processed data files found in the directory.")
-            return pd.DataFrame()
+    """Load the latest processed data from the processed folder."""
+    logger.info("Loading cleaned data from processed folder")
+    processed_folder = DataPreprocessingConfig.processed_data_path
+    if not os.path.exists(processed_folder):
+        logger.warning("Cannot find processed folder")
+        return pd.DataFrame()
+    files = [f for f in os.listdir(processed_folder) if os.path.isfile(os.path.join(processed_folder, f))]
+    processed_files = [f for f in files if f.startswith("processed_data_")]
+    if not processed_files:
+        logger.warning("No processed data files found in the directory.")
+        return pd.DataFrame()
 
-        latest_file = get_latest_modified_file(processed_files, processed_folder)
+    latest_file = get_latest_modified_file(processed_files, processed_folder)
+    try:
         data = pd.read_parquet(latest_file)
         logger.info(f"Loaded cleaned data from {processed_folder}")
         return data
-    except Exception as e:
+    except FileNotFoundError as e:
         raise e
 
 

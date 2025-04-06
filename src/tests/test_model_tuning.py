@@ -131,7 +131,6 @@ def test_hyperparameter_tuning_success():
             chosen_model_path,
             chosen_model_name,
             mock_column_transformer,
-            max_evals=5,
         )
 
         # Assertions
