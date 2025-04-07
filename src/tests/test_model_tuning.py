@@ -83,7 +83,7 @@ def test_hyperparameter_tuning_success():
     mock_random_cv_model.best_params_ = {"param1": 1, "param2": 2}
     mock_random_cv_model.fit.return_value = None
 
-    mock_mlflow = Mock()
+    mock_mlflow = MagicMock()
 
     mock_load_local_model = Mock(return_value=mock_model)
 
@@ -96,7 +96,7 @@ def test_hyperparameter_tuning_success():
     ]
 
     with (
-        patch("src.components.model_training.mlflow", mock_mlflow),
+        patch("src.components.model_tuning.mlflow", mock_mlflow),
         patch(
             "src.components.model_tuning.load_local_model",
             mock_load_local_model,
@@ -138,3 +138,7 @@ def test_hyperparameter_tuning_success():
         assert result.param2 == mock_best_model.param2
 
         assert isinstance(result, MockEstimator)
+
+        mock_mlflow.set_experiment.assert_called_once_with("Hyperparameter Tuning Phase")
+        mock_mlflow.set_experiment_tag.assert_called_once_with("model-tuning", "v1.0.0")
+        mock_mlflow.start_run.assert_called_once()
