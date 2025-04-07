@@ -19,27 +19,27 @@ load_dotenv(dotenv_path=os.path.join(root_dir, ".env"))
 
 @dataclass
 class DataIngestionConfig:
-    raw_data_path: str = os.environ["RAW_DATA_FILE"]
+    raw_data_path: str = "data/raw_data/EasyVisa.csv"
 
 
 @dataclass
 class DataPreprocessingConfig:
-    processed_data_path: str = os.environ["PROCESSED_DATA_FILE"]
+    processed_data_path: str = "data/processed_data/"
 
 
 @dataclass
 class FeatureEngineeringConfig:
-    feature_engineering_dir: str = os.environ["FEATURE_ENGINEERED_DATA_FILE"]
+    feature_engineering_dir: str = "data/feature_store/"
 
 
 @dataclass
 class ModelTrainingConfig:
-    model_artifact_dir: str = os.environ["ARTIFACTS_PATH"]
+    model_artifact_dir: str = "src/models/artifacts/"
 
 
 @dataclass
 class ModelTuningConfig:
-    model_artifact_dir: str = os.environ["TUNING_ARTIFACTS_PATH"]
+    model_artifact_dir: str = "src/models/tuning_artifacts/"
 
 
 search_space = {
