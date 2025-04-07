@@ -1,58 +1,107 @@
 import os
 from dataclasses import dataclass
-from datetime import datetime
 
+from dotenv import load_dotenv
+from scipy.stats import loguniform, randint, uniform
+from sklearn.ensemble import (
+    AdaBoostClassifier,
+    GradientBoostingClassifier,
+    RandomForestClassifier,
+)
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 
-@dataclass
-class DataPipelineConfig:
-    artifacts_dir: str
+root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+load_dotenv(dotenv_path=os.path.join(root_dir, ".env"))
 
-@dataclass 
-class FeatureEngineeringPipelineConfig:
-    feature_engineering_dir: str
-
-@dataclass
-class ModelTrainingPipelineConfig:
-    model_training_dir: str
 
 @dataclass
 class DataIngestionConfig:
-    raw_folder: str
-    processed_folder: str
+    raw_data_path: str = "data/raw_data/EasyVisa.csv"
 
-    def __init__(self, data_pipeline_config: DataPipelineConfig):
-        self.raw_folder = os.path.join(
-            data_pipeline_config.artifacts_dir, "raw_data"
-        )
-        self.processed_folder = os.path.join(
-            data_pipeline_config.artifacts_dir, "processed_data"
-        )
+
+@dataclass
+class DataPreprocessingConfig:
+    processed_data_path: str = "data/processed_data/"
 
 
 @dataclass
 class FeatureEngineeringConfig:
-    feature_engineering_dir: str
-    transformed_data_dir: str
-    transformed_features_file: str
-    transformed_target_file: str
+    feature_engineering_dir: str = "data/feature_store/"
 
-    def __init__(self, feature_engineering_pipeline_config: FeatureEngineeringPipelineConfig):
-        self.feature_engineering_dir = os.path.join(
-            feature_engineering_pipeline_config.feature_engineering_dir, "feature_engineered_data"
-        )
-        self.transformed_data_dir = os.path.join(self.feature_engineering_dir, "transformed_data")
-        self.transformed_features_file = os.path.join(self.transformed_data_dir, "features.parquet")
-        self.transformed_target_file = os.path.join(self.transformed_data_dir, "target.parquet")
 
 @dataclass
 class ModelTrainingConfig:
-    feature_engineered_data_dir: str
-    model_output_dir: str
-    model_file: str
+    model_artifact_dir: str = "src/models/artifacts/"
 
-    def __init__(self, model_training_pipeline_config: ModelTrainingPipelineConfig, feature_engineering_config: FeatureEngineeringConfig):
-        self.feature_engineered_data_dir = feature_engineering_config.feature_engineering_dir
-        self.model_output_dir = os.path.join(
-            model_training_pipeline_config.model_training_dir, "model_output"
-        )
-        self.model_file = os.path.join(self.model_output_dir, "trained_model.pkl")
+
+@dataclass
+class ModelTuningConfig:
+    model_artifact_dir: str = "src/models/tuning_artifacts/"
+
+
+search_space = {
+    "Random_Forest": {
+        "n_estimators": randint(100, 500),  # Random integer between 100 and 500
+        "max_depth": randint(10, 50),  # Random integer between 10 and 50
+        "min_samples_split": randint(2, 10),  # Random integer between 2 and 10
+        "min_samples_leaf": randint(1, 5),  # Random integer between 1 and 5
+        "criterion": ["gini", "entropy"],  # Categorical (no distribution)
+    },
+    "Decision_Tree": {
+        "max_depth": randint(10, 50),
+        "min_samples_split": randint(2, 10),
+        "min_samples_leaf": randint(1, 5),
+        "criterion": ["gini", "entropy"],
+    },
+    "Gradient_Boosting": {
+        "n_estimators": randint(100, 500),
+        "learning_rate": loguniform(1e-3, 1e-1),  # Log-uniform distribution between 0.001 and 0.1
+        "max_depth": randint(10, 50),
+        "min_samples_split": randint(2, 10),
+        "min_samples_leaf": randint(1, 5),
+    },
+    "Logistic_Regression": {
+        "C": loguniform(1e-2, 1e2),  # Log-uniform distribution between 0.01 and 100
+        "solver": ["lbfgs", "liblinear", "sag", "saga"],
+    },
+    "K-Neighbors_Classifier": {
+        "n_neighbors": randint(1, 31),  # Random integer between 1 and 30
+        "weights": ["uniform", "distance"],
+        "algorithm": ["ball_tree", "kd_tree", "brute"],
+    },
+    "XGBClassifier": {
+        "n_estimators": randint(100, 500),
+        "learning_rate": loguniform(1e-3, 1e-1),
+        "max_depth": randint(10, 50),
+        "subsample": uniform(0.5, 0.5),  # Uniform distribution between 0.5 and 1.0
+        "colsample_bytree": uniform(0.5, 0.5),
+    },
+    "CatBoosting_Classifier": {
+        "iterations": randint(100, 500),
+        "learning_rate": loguniform(1e-3, 1e-1),
+        "depth": randint(4, 11),
+        "l2_leaf_reg": randint(1, 11),
+    },
+    "Support_Vector_Classifier": {
+        "C": loguniform(1e-1, 1e1),  # Log-uniform distribution between 0.1 and 10
+        "kernel": ["linear", "poly", "rbf", "sigmoid"],
+    },
+    "AdaBoost_Classifier": {
+        "n_estimators": randint(50, 300),
+        "learning_rate": loguniform(1e-3, 1e0),  # Log-uniform distribution between 0.001 and 1.0
+    },
+}
+
+# Models list for Hyperparameter tuning
+randomcv_models = [
+    ("Random_Forest", RandomForestClassifier(), search_space["Random_Forest"]),
+    ("K-Neighbors_Classifier", KNeighborsClassifier(), search_space["K-Neighbors_Classifier"]),
+    ("Decision_Tree", DecisionTreeClassifier(), search_space["Decision_Tree"]),
+    ("Gradient_Boosting", GradientBoostingClassifier(), search_space["Gradient_Boosting"]),
+    ("Logistic_Regression", LogisticRegression(), search_space["Logistic_Regression"]),
+    ("Support_Vector_Classifier", SVC(), search_space["Support_Vector_Classifier"]),
+    ("AdaBoost_Classifier", AdaBoostClassifier(), search_space["AdaBoost_Classifier"]),
+]

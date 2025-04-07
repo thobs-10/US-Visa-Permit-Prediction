@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "us-visa-permit-mlops-zoomcamp-course-project"
+version = "0.0.0"
+authors = [{ name = "Thobela Sixpence", email = "thobela.sixpence@gmail.com" }]
+description = "This project is an e2e implementation of MLOps to enhance the use-case being solved using machine learning. It is a us visa classification problem that classifies whethere certain individuals qualify or not be granted visa."
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["mlops", "visa", "permit", "zoomcamp", "machine-learning"]
+license = { text = "MIT" }
+classifiers = ["Programming Language :: Python :: 3"]
+
+# Direct dependencies (no transitive dependencies)
+dependencies = [
+    "zenml>=0.75.0",
+    "pytest>=8.3.4",
+    "pytest-mock>=3.14.0",     # Assuming this is the version you want
+    "numpy>=1.26.4",
+    "pandas>=2.2.3",
+    "feast>=0.46.0",
+    "fastapi>=0.110.0",
+    "mlflow>=2.20.3",
+    "cloudpickle==2.2.1",      # From your requirements.txt
+    "pytest-xdist>=3.6.1",
+    "pytest-cov>=6.0.0",
+    "pytest-instafail>=0.5.0",
+    "pytest-randomly>=3.16.0",
+    "pre_commit>=4.2.0",
+    "loguru>=0.7.3",
+    "pydantic>=2.8.2",
+    "uvicorn>=0.34.0",
+    "setuptools-scm>=8.2.0",
+    "requests>=2.23.3",
+]
+
+[project.optional-dependencies]
+dev = ["black==24.1.1", "isort==5.13.2", "pylint==3.1.0", "ruff==0.4.4", "setuptools_scm>=8.2.0"]
+
+[tool.setuptools_scm]
+write_to = "src/us_visa_prediction_mlops_project/_version.py"  # Optional: write version to a file
+
+[tool.mypy]
+ignore_missing_imports = true
+
+exclude = ["venv", ".venv", "us-visa-project"]

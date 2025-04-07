@@ -1,17 +1,17 @@
+import logging
 import os
 from pathlib import Path
-import logging
 
-logging.basicConfig(level=logging.INFO, format='[%(asctime)s]: %(message)s:')
+logging.basicConfig(level=logging.INFO, format="[%(asctime)s]: %(message)s:")
 
-project_name = 'src'
+project_name = "src"
 
 list_of_files = [
     "github/workflows/.gitkeep",
     f"{project_name}/__init__.py",
-    f"data/.gitkeep",
-    f"data/raw/.gitkeep",
-    f"data/processed/.gitkeep",
+    "data/.gitkeep",
+    "data/raw/.gitkeep",
+    "data/processed/.gitkeep",
     f"{project_name}/models/.gitkeep",
     "notebooks/eda.ipynb",
     f"{project_name}/components/__init__.py",
@@ -43,20 +43,18 @@ list_of_files = [
     ".gitignore",
     ".env",
     "Dockerfile",
-    "Makefile"
-
+    "Makefile",
 ]
 
 for filepath in list_of_files:
     file_path = Path(filepath)
     filedir, filename = os.path.split(filepath)
 
-    if filedir!="":
+    if filedir != "":
         os.makedirs(filedir, exist_ok=True)
         logging.info(f"Created directory: {filedir} for filename: {filename}")
-    if(not os.path.exists(filename)) or (os.path.getsize(filename) == 0):
-        with open(filepath, 'w') as f:
-            pass
+    if (not os.path.exists(filename)) or (os.path.getsize(filename) == 0):
+        with open(filepath, "w", encoding="utf-8") as f:
             logging.info(f"Created file: {filename}")
     else:
         logging.info(f"File {filename} already exists.")

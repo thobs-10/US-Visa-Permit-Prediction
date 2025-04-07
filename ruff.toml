@@ -1,0 +1,21 @@
+line-length = 200
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line too long, handled by line-length setting.
+]
+fix = true
+
+[isort]
+known-first-party = ["US-VISA-PERMIT-PREDICTION"]
+
+[per-file-ignores]
+"tests/*" = ["B018"]         # Allows asserts in test files.
+"tests/test_*.py" = ["E501"] # Allows line length of 200 in test files.

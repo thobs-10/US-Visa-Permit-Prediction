@@ -157,8 +157,3 @@ To see how the predictions are distributed, run the batch monitoring script:
 ```
 python batch_monitoring.py
 ```
-
-
-
-
-

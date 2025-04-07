@@ -1,43 +1,34 @@
-import pickle
+import time
+from datetime import datetime
+
 import pandas as pd
-import os
-from datetime import datetime
-import time 
-
-from evidently.report import Report
-from evidently.metric_preset import DataDriftPreset, TargetDriftPreset, DataQualityPreset, ClassificationPreset, classification_performance
 from evidently import ColumnMapping
+from evidently.metric_preset import (
+    DataDriftPreset,
+    DataQualityPreset,
+    TargetDriftPreset,
+)
+from evidently.report import Report
 
-from evidently.test_suite import TestSuite
-from evidently.tests import *
-from evidently.test_preset import NoTargetPerformanceTestPreset
-from evidently.test_preset import DataQualityTestPreset
-from evidently.test_preset import DataStabilityTestPreset
-from evidently.test_preset import DataDriftTestPreset
-from evidently.test_preset import BinaryClassificationTestPreset
 
-from datetime import datetime
-
-def load_logged_data(log_file) ->pd.DataFrame:
+def load_logged_data(log_file) -> pd.DataFrame:
     data = []
-    with open(log_file, 'r') as file:
+
+    with open(log_file, mode="rb", encoding="utf-8") as file:
         for line in file:
             if "Model prediction" in line:
-                prediction = int(line.split(':')[-1].strip())
-                data.append({'case_status': prediction})
+                prediction = int(line.split(":")[-1].strip())
+                data.append({"case_status": prediction})
+        file.close()
     return pd.DataFrame(data)
 
-def create_dashboard(reference_data, current_data):
 
+def create_dashboard(reference_data: pd.DataFrame, current_data: pd.DataFrame):
     column_mapping = ColumnMapping()
 
-    column_mapping.target = 'case_status'
-    column_mapping.prediction = 'prediction'
-    reports = [
-        Report(metrics=[DataDriftPreset()]),
-        Report(metrics=[TargetDriftPreset()]),
-        Report(metrics=[DataQualityPreset()])
-    ]
+    column_mapping.target = "case_status"
+    column_mapping.prediction = "prediction"
+    reports = [Report(metrics=[DataDriftPreset()]), Report(metrics=[TargetDriftPreset()]), Report(metrics=[DataQualityPreset()])]
     log_file = "dashboard_errors.log"
 
     for report in reports:
@@ -53,15 +44,14 @@ def create_dashboard(reference_data, current_data):
                 report.save_html(file_name)
                 print(f"Dashboard saved as {file_name}")
             time.sleep(1)
-        except Exception as e:
-            with open(log_file, 'a') as f:
+        except FileNotFoundError as e:
+            with open(log_file, "a", encoding="utf-8") as f:
                 f.write(f"Error generating report: {e}\n")
             print(f"Error generating report: {e}")
-   
-if __name__ == '__main__':
-    reference_data = pd.read_parquet('data/feature_store/y_valid.parquet')
-    current_data = load_logged_data('predictions.log')
-    # Load sample data
-    # reference_data = pd.DataFrame({'target': [1, 0, 1, 0, 1]})
-    # current_data = pd.DataFrame({'prediction': [1, 0, 1, 0, 1]})
-    create_dashboard(reference_data, current_data)
+            f.close()
+
+
+if __name__ == "__main__":
+    reference_dataset = pd.read_parquet("data/feature_store/y_valid.parquet")
+    current_dataset = load_logged_data("predictions.log")
+    create_dashboard(reference_dataset, current_dataset)
