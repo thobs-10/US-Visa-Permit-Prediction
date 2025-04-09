@@ -42,8 +42,8 @@ jobs:
       - name: Install project dependencies
         run: |
           source venv/bin/activate
-          pip install -e.[dev]
-          pip install .
+          pip install -e ".[dev]"
+          pip install -e .
 
       - name: Extract version from pyproject.toml
         id: extract_version
@@ -88,12 +88,17 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools wheel
       - name: Install project dependencies
         run: |
           source venv/bin/activate
-          pip install -e.[dev]
-          pip install .
+          pip install -e ".[dev]"
+          pip install -e .
+
+      - name: Verify Loguru installation
+        run: |
+          source venv/bin/activate
+          python -c "import loguru; print('Loguru version:', loguru.__version__)"
 
       - name: make bash script executable
         run: |
