@@ -102,10 +102,12 @@ jobs:
 
       - name: make bash script executable
         run: |
+          source venv/bin/activate
           chmod +x ./run.sh
 
       - name: Run the bash script
         run: |
+          source venv/bin/activate
           ./run.sh run_pipelines
 
   push-and-publish:
