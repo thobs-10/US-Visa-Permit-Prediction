@@ -6,32 +6,32 @@ from src.components.data_ingestion import (
     handling_data_type,
     handling_duplicates,
     handling_null_values,
-    load_data,
+    load_raw_data,
 )
 
 
 def test_load_data_success(mock_raw_data_path, sample_data, mocker):
     """Testing load_data successfully."""
     mock_read_csv = mocker.patch("pandas.read_csv", return_value=sample_data)
-    data = load_data()
+    data = load_raw_data()
     mock_read_csv.assert_called_once_with("data/raw_data/EasyVisa.csv")
     assert not data.empty
     assert list(data.columns) == ["col1", "col2"]
     assert len(data) == 3
 
 
-def test_load_data_exception(mock_raw_data_path, mocker):
-    """Testing load_data with exception."""
+def test_load_raw_data_exception(mock_raw_data_path, mocker):
+    """Testing load_raw_data with exception."""
     mock_read_csv = mocker.patch("pandas.read_csv", side_effect=FileNotFoundError)
     with pytest.raises(FileNotFoundError):
-        load_data()
+        load_raw_data()
     mock_read_csv.assert_called_once_with("data/raw_data/EasyVisa.csv")
 
 
-def test_load_data_empty_file(mock_raw_data_path, mocker):
-    """Testing load_data with an empty file."""
+def test_load_raw_data_empty_file(mock_raw_data_path, mocker):
+    """Testing load_raw_data with an empty file."""
     mock_read_csv = mocker.patch("pandas.read_csv", return_value=pd.DataFrame())
-    data = load_data()
+    data = load_raw_data()
     mock_read_csv.assert_called_once_with("data/raw_data/EasyVisa.csv")
     assert data.empty
     assert not list(data.columns)

@@ -25,7 +25,7 @@ from src.utils.main_utils import (
 
 
 @step(enable_cache=False)
-def load_data() -> pd.DataFrame:
+def load_processed_data() -> pd.DataFrame:
     """Load the latest processed data from the processed folder."""
     logger.info("Loading cleaned data from processed folder")
     processed_folder = DataPreprocessingConfig.processed_data_path

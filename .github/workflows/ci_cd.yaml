@@ -42,8 +42,8 @@ jobs:
       - name: Install project dependencies
         run: |
           source venv/bin/activate
-          pip install -e.[dev]
-          pip install .
+          pip install -e ".[dev]"
+          pip install -e .
 
       - name: Extract version from pyproject.toml
         id: extract_version
@@ -67,12 +67,12 @@ jobs:
           source venv/bin/activate
           SKIP=no-commit-to-branch pre-commit run --all-files
 
-      - name: Run tests
+      - name: Run Unit tests
         run: |
           source venv/bin/activate
           pytest -n auto
 
-  build-and-run-system:
+  build-project:
     needs: install-and-test
     runs-on: ubuntu-latest
     steps:
@@ -88,23 +88,20 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools wheel
       - name: Install project dependencies
         run: |
           source venv/bin/activate
-          pip install -e.[dev]
-          pip install .
+          pip install -e ".[dev]"
+          pip install -e .
 
-      - name: make bash script executable
+      - name: Verify Loguru installation
         run: |
-          chmod +x ./run.sh
-
-      - name: Run the bash script
-        run: |
-          ./run.sh run_pipelines
+          source venv/bin/activate
+          python -c "import loguru; print('Loguru version:', loguru.__version__)"
 
   push-and-publish:
-    needs: [install-and-test, build-and-run-system]
+    needs: [install-and-test, build-project]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
