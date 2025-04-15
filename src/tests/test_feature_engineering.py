@@ -9,12 +9,12 @@ import pytest
 from src.components.feature_engineering import (
     feature_extraction,
     feature_transformations,
-    load_data,
+    load_processed_data,
     removing_outliers,
 )
 
 
-def test_load_data_success():
+def test_load_processed_data_success():
     """Test successful loading of the latest processed file."""
     mock_files = [
         "processed_data_20231001_120000.parquet",
@@ -33,22 +33,22 @@ def test_load_data_success():
         patch("pandas.read_parquet", return_value=mock_data),
         patch("src.components.feature_engineering.logger.info"),
     ):
-        result = load_data()
+        result = load_processed_data()
 
         assert result.equals(mock_data)
 
         pd.read_parquet.assert_called_once_with(os.path.join(mock_processed_folder, mock_latest_file))
 
 
-def test_load_data_no_files_found():
+def test_load_processed_data_no_files_found():
     """Test case when no processed files are found."""
     mock_files = []
     with patch("os.listdir", return_value=mock_files):
-        result = load_data()
+        result = load_processed_data()
         assert result.empty
 
 
-def test_load_data_invalid_file():
+def test_load_processed_data_invalid_file():
     """Test that an exception is raised if the file is invalid."""
     mock_files = ["processed_data_20231001_120000.parquet"]
     mock_processed_folder = "/mock/processed/folder"
@@ -62,7 +62,7 @@ def test_load_data_invalid_file():
         patch("pandas.read_parquet", side_effect=Exception("Mocked error")),
         pytest.raises(Exception, match="Mocked error"),
     ):
-        load_data()
+        load_processed_data()
 
 
 def test_feature_extraction_success():
