@@ -67,12 +67,12 @@ jobs:
           source venv/bin/activate
           SKIP=no-commit-to-branch pre-commit run --all-files
 
-      - name: Run tests
+      - name: Run Unit tests
         run: |
           source venv/bin/activate
           pytest -n auto
 
-  build-and-run-system:
+  build-project:
     needs: install-and-test
     runs-on: ubuntu-latest
     steps:
@@ -100,18 +100,8 @@ jobs:
           source venv/bin/activate
           python -c "import loguru; print('Loguru version:', loguru.__version__)"
 
-      - name: make bash script executable
-        run: |
-          source venv/bin/activate
-          chmod +x ./run.sh
-
-      - name: Run the bash script
-        run: |
-          source venv/bin/activate
-          ./run.sh run_pipelines
-
   push-and-publish:
-    needs: [install-and-test, build-and-run-system]
+    needs: [install-and-test, build-project]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
