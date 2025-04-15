@@ -4,7 +4,7 @@ from zenml import pipeline
 from src.components.feature_engineering import (
     feature_extraction,
     feature_transformations,
-    load_data,
+    load_processed_data,
     removing_outliers,
     save,
     save_to_feast_feature_store,
@@ -15,7 +15,7 @@ from src.components.feature_engineering import (
 def run_feature_engineering() -> None:
     try:
         logger.info("Starting feature engineering pipeline")
-        processed_data = load_data()
+        processed_data = load_processed_data()
         df = feature_extraction(processed_data)
         df = removing_outliers(df)
         df, X, y = feature_transformations(df)
