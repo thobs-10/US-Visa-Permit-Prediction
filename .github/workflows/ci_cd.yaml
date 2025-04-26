@@ -59,10 +59,10 @@ jobs:
       - name: Push tag
         if: github.ref == 'refs/heads/main'
         run: |
-          git remote set-url origin https://x-access-token:${{ secrets.GIT_TAG_ACTIONS_TOKEN }}@github.com/${{ github.repository }}.git
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push origin refs/tags/${{ steps.extract_version.outputs.VERSION }}
         env:
-          GIT_TAG_ACTIONS_TOKEN: ${{ secrets.GIT_TAG_ACTIONS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Analysing the code with ruff and pre-commit
         run: |
