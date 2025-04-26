@@ -51,18 +51,16 @@ jobs:
           source venv/bin/activate
           VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-           git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "thobs-10"
+          git config --global user.email "thobela.sixpence@gmail.com"
           git tag $VERSION
           echo "Created tag $VERSION locally"
 
       - name: Push tag
         if: github.ref == 'refs/heads/main'
-        run: |
-          git remote set-url origin https://x-access-token:${{ secrets.GIT_TAG_ACTIONS_TOKEN }}@github.com/${{ github.repository }}.git
-          git push origin refs/tags/${{ steps.extract_version.outputs.VERSION }}
+        run: git push origin ${{ steps.extract_version.outputs.VERSION }}
         env:
-          GIT_TAG_ACTIONS_TOKEN: ${{ secrets.GIT_TAG_ACTIONS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Analysing the code with ruff and pre-commit
         run: |
@@ -109,8 +107,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all tags and branches
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
