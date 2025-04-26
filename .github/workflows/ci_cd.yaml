@@ -128,7 +128,9 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64, linux/arm64, linux/x86_64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/us-visa-prediction-mlops-project:latest:1.0.1
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/us-visa-prediction-mlops-project:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/us-visa-prediction-mlops-project:1.0.1
 
       - name: Image Digest
         run: echo ${{ steps.push-and-publish.outputs.digest }} # type: ignore
