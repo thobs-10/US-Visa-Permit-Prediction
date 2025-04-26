@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "us-visa-permit-mlops-zoomcamp-course-project"
-version = "0.0.0"
+version = "1.0.1"
 authors = [{ name = "Thobela Sixpence", email = "thobela.sixpence@gmail.com" }]
 description = "This project is an e2e implementation of MLOps to enhance the use-case being solved using machine learning. It is a us visa classification problem that classifies whethere certain individuals qualify or not be granted visa."
 readme = "README.md"
