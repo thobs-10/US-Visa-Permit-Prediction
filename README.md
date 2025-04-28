@@ -26,6 +26,27 @@ Model Deployment
 
 Model Monitoring
 
+---
+
+## **Project Criteria and Achievements**  
+
+| **Criteria**                          | **Status** |
+| ------------------------------------- | ---------- |
+| Problem description                   | ✅          |
+| Exploratory Data Analysis (EDA)       | ✅          |
+| Model Training & Experiment tracking  | ✅          |
+| ML Pipeline Orchestration             | ✅          |
+| Feature Store                         | ✅          |
+| Model Deployment(CI/CD)               | ✅          |
+| Code Quality Checks                   | ✅          |
+| Testing Suites                        | ✅          |
+| Reproducibility                       | ✅          |
+| Dependency and Environment Management | ✅          |
+| Containerization                      | ✅          |
+| Cloud Deployment(Dockerhub)           | ✅          |
+
+---
+
 ### Data
 
 The dataset used in this project contains historical data of visa applications. Each record represents an application with various features influencing the visa approval decision.
@@ -38,9 +59,10 @@ Please download the dataset from the following link: [Dataset Link](https://www.
 
 Clone the Repository:
 ``
-git clone <repository-url>
+git clone [repo link](https://github.com/thobs-10/US-Visa-Permit-Prediction)
 
-cd <repository-directory>
+cd `mlops-zoomcamp-project-2024/US-Visa-Permit-Prediction`
+
 ``
 Create a Virtual Environment:
 
@@ -76,7 +98,8 @@ Download and Prepare the Dataset:
 Download the dataset and create the following directory structure:
 
 ``
-<repository-directory>/
+
+mlops-zoomcamp-project-2024/US-Visa-Permit-Prediction/
 
 └── data/
 
@@ -85,26 +108,29 @@ Download the dataset and create the following directory structure:
         └── Visadataset.csv
 ``
 
-Create a Free Account on Comet.ml:
+For experiment tracking I are using MLFlow, you need to download it in order to proceed. [mlflow](https://mlflow.org/docs/latest/index.html)
 
-Sign up at Comet.ml. This is used for experiment tracking and model registry
+For orchestrating ML pipelines I use ZenML which captures every metadata, data versioning in each pipeline step and caching of certain steps for increasing efficiency. [zenml](https://docs.zenml.io/getting-started/installation)
 
-Create a project, go to settings, and get your API key, project name, and workspace name.
-
-Place these details in a .env file in the root directory:
-
-``
-API_KEY="your-api-key"
-
-PROJECT_NAME="project-name"
-
-WORKSPACE="workspace-name"
-``
+For storing our features and versioning which features are working best for our model I use Feast. [feast](https://docs.feast.dev/getting-started/concepts)
 
 
-Running the Project
+
+#### Running the Project
 
 Once everything is set up, follow these steps to run the project:
+
+I opted to use bash script as my task runner for executing the system end to end since it gave me more flexibility in terms of specifying how I want each component to be run and what arguments are needed if there are any. To run the system you can just specify these commands in your terminal:
+
+``
+
+    ./run.sh install_package
+
+    ./run.sh run_pre_commit
+
+    ./run.sh run_pipelines
+
+``
 
 Run the Pipelines:
 
@@ -116,15 +142,13 @@ run_feature_engineering_pipeline()
 run_training_model_pipeline()
 ```
 
-To run each pipeline, comment out the other pipelines and execute the script( first comment out the feature engineering and nodel training pipeline, then run data ingestion pipeline, after that commeent out the data ingestion pipeline and model training pipeline and run the feature engineering pipeline and so forth):
+To run each pipeline, comment out the other pipelines and execute the script( first comment out the feature engineering and model training pipeline, then run data ingestion pipeline, after that comment out the data ingestion pipeline and model training pipeline and run the feature engineering pipeline and so forth). Even much more better you can run each pipeline by going to the `src/pipeline` folder to get each pipeline and run it. To run all pipelines without making use of the bash script you can run:
 
 ```
 python run_pipeline.py
 ```
 
-This command will trigger the specific pipeline and run all necessary functions inside the pipeline's component script. Each pipeline is made up of components, and those components contain the function steps for the pipeline.
-
-Understanding the Pipeline Implementation:
+This command will trigger the specific pipeline and run all necessary functions inside the pipeline's component script. Each pipeline is made up of components, and those components contain the function steps for the pipeline. The pipelines will execute and create a model that will later be served using FastAPI and containerized using Docker Containers. Then the container is later deployed to Dockerhub using a CI/CD pipeline that caters for these platforms: `linux/amd64, linux/arm64, linux/x86_64`.
 
 To see how the pipelines are implemented, go to the pipelines folder.
 
@@ -135,25 +159,20 @@ Running the FastAPI Endpoint and Request Script:
 Start the FastAPI endpoint:
 
 ```
-uvicorn app:app --reload
+uvicorn app:app --reload --host=0.0.0.0  --port=8000
 ```
 (Run this command in a separate terminal)
 
+#### Outdated features:
+- Sending requests to the fastAPI server
+- Capturing predictions made by the model for monitoring dashboard for later incidents such as model drift, feature drift, model degredation etc.
+- Monitoring script using evidently AI.
+
+### WIP features:
+- Bash script to schedule the task or the pipelines to run on a cadence and send data in batches.
+- Automated A/B testing of the models, at which point do I want to change the current model with a newly up to date trained one.
+- Deployment strategies following the A/B test, is it canary deployment, shadow deploys etc?
+- Batch monitoring by capturing the model preictions and storing them eather on Premotheus and integrating that with Grafana for monitoring dashboards.
 Send a dummy request to the model:
 
-```
-python request.py
-```
-
-(Run this command in another separate terminal)
-
-
-Every prediction will be saved in a log file.
-
-Run the Batch Monitoring Script:
-
-To see how the predictions are distributed, run the batch monitoring script:
-
-```
-python batch_monitoring.py
-```
+In summary this is just my hobby project that I wanted to try out and learn from it different things and just to make use of the best practices in a side project. As much as this expresses my passion and love for machine learning, MLOps and programming, it also serves as my escape plan after working hours on work projects and grounds me back to something I love doing.
