@@ -37,6 +37,18 @@ run_pre_commit() {
   echo "Running pre-commit checks..."
   SKIP=no-commit-to-branch pre-commit --files src/
 }
+# clean codebase
+clean() {
+  echo "Cleaning the codebase..."
+  find . -type d -name ".ruff_cache" -exec rm -rf {} +
+  find . -type d -name ".pytest_cache" -exec rm -rf {} +
+  find . -type d -name ".mypy_cache" -exec rm -rf {} +
+  find . -type d -name ".ipynb_checkpoints" -exec rm -rf {} +
+  find . -type d -name "cachedir" -exec rm -rf {} +
+  find . -type d -name "column_transformer.joblib" -exec rm -rf {} +
+  find . -type d -name "*.egg-info" -exec rm -rf {} +
+  echo "Codebase cleaned."
+}
 
 # For CI: Run specific functions if arguments are provided
 if [ $# -gt 0 ]; then
@@ -65,5 +77,5 @@ run_pipelines
 
 # Run pre-commit checks
 run_pre_commit
-
+clean
 echo "Development process completed."
