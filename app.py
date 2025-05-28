@@ -7,10 +7,18 @@ import pandas as pd
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from loguru import logger
+
+# Prometheus metrics (auto-instrumentation)
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from sklearn.pipeline import Pipeline
 
+from monitoring import ml_monitoring
+
 app = FastAPI()
+
+
+Instrumentator().instrument(app).expose(app)
 
 
 def get_registered_model() -> Pipeline | None:
@@ -65,7 +73,7 @@ async def prediction(input_data: ModelInput):
         model_pipeline = get_registered_model()
         pred = model_pipeline.predict(input_df)
         logger.info(f"Model prediction: {pred[0].item()}")
-
+        ml_monitoring.log_prediction(input_df, pred[0].item())
         return {"prediction": pred[0].item()}
     except ConnectionError as e:
         logger.error(f"Prediction error: {e}")
